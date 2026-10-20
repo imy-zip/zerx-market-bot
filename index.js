@@ -20,6 +20,8 @@ const {
   MediaGalleryBuilder,
   TextDisplayBuilder,
   ContainerBuilder,
+  SeparatorBuilder,
+  SeparatorSpacingSize,
   AttachmentBuilder,
   PermissionFlagsBits,
 } = require('discord.js');
@@ -170,14 +172,23 @@ function buildVouch(session, photoUrls) {
   }
 
   // 4. DEUX LIGNES INVISIBLES
-  // Pas de trait de séparation
+  // Pour espacer le titre et les liens
   container.addTextDisplayComponents(
     new TextDisplayBuilder().setContent(
       '\u200B\n\u200B'
     )
   );
 
-  // 5. LIENS UTILES
+  // =====================================
+  // 5. BARRE HORIZONTALE
+  // =====================================
+  container.addSeparatorComponents(
+    new SeparatorBuilder()
+      .setDivider(true)
+      .setSpacing(SeparatorSpacingSize.Small)
+  );
+
+  // 6. LIENS UTILES
   container.addTextDisplayComponents(
     new TextDisplayBuilder().setContent(
       [
