@@ -32,6 +32,7 @@ const {
 
 const TOKEN = process.env.DISCORD_TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
+
 const GUILD_ID =
   process.env.GUILD_ID || '1195047756910309456';
 
@@ -128,7 +129,6 @@ function formatAmount(value) {
     .replace(/\n/g, ' ')
     .trim();
 
-  // Ajoute € uniquement s'il n'est pas déjà présent.
   return amount.includes('€')
     ? amount
     : `${amount}€`;
@@ -141,7 +141,7 @@ function getRFTitle(session) {
 
   const amount = formatAmount(session.amount);
 
-  // Le lien concerne uniquement le nom du site.
+  // Seul le nom du site est cliquable.
   const siteTitle = session.siteUrl
     ? `[${site}](${session.siteUrl})`
     : site;
@@ -183,7 +183,7 @@ function buildRFVouch(session, photoUrls) {
 
   container.addMediaGalleryComponents(gallery);
 
-  // TITRE LÉGÈREMENT PLUS PETIT
+  // TITRE RF
   container.addTextDisplayComponents(
     new TextDisplayBuilder().setContent(
       `### ${getRFTitle(session)}`
@@ -234,7 +234,7 @@ function buildRFVouch(session, photoUrls) {
 function buildUEVouch(session, photoUrls) {
   const container = new ContainerBuilder();
 
-  // PHOTO DU VOUCH EN HAUT
+  // PHOTO EN HAUT
   const gallery = new MediaGalleryBuilder();
 
   for (const url of photoUrls) {
@@ -250,7 +250,12 @@ function buildUEVouch(session, photoUrls) {
     )
   );
 
-  // VRAIE BARRE HORIZONTALE DISCORD
+  // NOUVEAU : ESPACE INVISIBLE SOUS LE TITRE
+  container.addTextDisplayComponents(
+    new TextDisplayBuilder().setContent('\u200B')
+  );
+
+  // BELLE BARRE HORIZONTALE DISCORD
   container.addSeparatorComponents(
     new SeparatorBuilder()
       .setDivider(true)
