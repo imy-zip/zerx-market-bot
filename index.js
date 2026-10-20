@@ -66,10 +66,7 @@ function getSession() {
 
   if (!session) return null;
 
-  if (
-    Date.now() - session.updated >
-    SESSION_TIMEOUT
-  ) {
+  if (Date.now() - session.updated > SESSION_TIMEOUT) {
     sessions.delete(OWNER_ID);
     return null;
   }
@@ -100,17 +97,51 @@ function safeText(value) {
     .trim();
 }
 
+function escapeMarkdown(value) {
+  return safeText(value)
+    .replace(/\\/g, '\\\\')
+    .replace(/([[\]()*_~`>|])/g, '\\$1');
+}
+
+function normalizeSiteUrl(value) {
+  const raw = String(value || '').trim();
+
+  if (!raw) return '';
+
+  try {
+    const url = new URL(raw);
+
+    if (
+      url.protocol !== 'https:' &&
+      url.protocol !== 'http:'
+    ) {
+      return null;
+    }
+
+    return url.href;
+  } catch {
+    return null;
+  }
+}
+
 function getTitle(session) {
-  const site = safeText(session.site)
+  const site = escapeMarkdown(session.site)
     .toUpperCase()
     .replace(/\n/g, ' ');
 
-  const amount = safeText(session.amount)
+  const amount = escapeMarkdown(session.amount)
     .replace(/\n/g, ' ');
 
-  return `${site} - ${
-    amount.includes('€') ? amount : amount + '€'
-  }`;
+  const formattedAmount = amount.includes('€')
+    ? amount
+    : `${amount}€`;
+
+  // Seul le nom du site devient cliquable.
+  const siteTitle = session.siteUrl
+    ? `[${site}](${session.siteUrl})`
+    : site;
+
+  return `${siteTitle} - ${formattedAmount}`;
 }
 
 function getImage(message) {
@@ -124,18 +155,15 @@ function getImage(message) {
 }
 
 function getExtension(attachment) {
-  const match =
-    /\.(png|jpg|jpeg|webp|gif)$/i.exec(
-      attachment.name || ''
-    );
+  const match = /\.(png|jpg|jpeg|webp|gif)$/i.exec(
+    attachment.name || ''
+  );
 
-  return match
-    ? match[1].toLowerCase()
-    : 'png';
+  return match ? match[1].toLowerCase() : 'png';
 }
 
 // =====================================
-// DESIGN DU VOUCH - ENCADRÉ COMPONENTS V2
+// DESIGN DU VOUCH - COMPONENTS V2
 // =====================================
 
 function buildVouch(session, photoUrls) {
@@ -145,14 +173,12 @@ function buildVouch(session, photoUrls) {
   const gallery = new MediaGalleryBuilder();
 
   for (const url of photoUrls) {
-    gallery.addItems((item) =>
-      item.setURL(url)
-    );
+    gallery.addItems((item) => item.setURL(url));
   }
 
   container.addMediaGalleryComponents(gallery);
 
-  // 2. TITRE SOUS LES PHOTOS
+  // 2. TITRE : LIEN SUR LE SITE UNIQUEMENT
   container.addTextDisplayComponents(
     new TextDisplayBuilder().setContent(
       `## ${getTitle(session)}`
@@ -160,10 +186,7 @@ function buildVouch(session, photoUrls) {
   );
 
   // 3. COMMENTAIRE FACULTATIF
-  if (
-    session.comment &&
-    session.comment.trim()
-  ) {
+  if (session.comment && session.comment.trim()) {
     container.addTextDisplayComponents(
       new TextDisplayBuilder().setContent(
         `💬 ${safeText(session.comment)}`
@@ -171,17 +194,14 @@ function buildVouch(session, photoUrls) {
     );
   }
 
-  // 4. DEUX LIGNES INVISIBLES
-  // Pour espacer le titre et les liens
+  // 4. UNE SEULE LIGNE INVISIBLE
   container.addTextDisplayComponents(
     new TextDisplayBuilder().setContent(
-      '\u200B\n\u200B'
+      '\u200B'
     )
   );
 
-  // =====================================
   // 5. BARRE HORIZONTALE
-  // =====================================
   container.addSeparatorComponents(
     new SeparatorBuilder()
       .setDivider(true)
@@ -201,7 +221,7 @@ function buildVouch(session, photoUrls) {
     )
   );
 
-  // Aucun accent coloré
+  // Encadré sans bande colorée
   return [container];
 }
 
@@ -212,9 +232,7 @@ function buildVouch(session, photoUrls) {
 function publishControls(session) {
   const menu = new ChannelSelectMenuBuilder()
     .setCustomId('zm:channel')
-    .setPlaceholder(
-      '📢 Choisir le salon de publication'
-    )
+    .setPlaceholder('📢 Choisir le salon de publication')
     .addChannelTypes(
       ChannelType.GuildText,
       ChannelType.GuildAnnouncement
@@ -223,25 +241,15 @@ function publishControls(session) {
     .setMaxValues(1);
 
   if (session.targetChannelId) {
-    menu.setDefaultChannels(
-      session.targetChannelId
-    );
+    menu.setDefaultChannels(session.targetChannelId);
   }
 
   return [
     new ActionRowBuilder().addComponents(menu),
 
     rowButtons(
-      [
-        'zm:confirm',
-        'Confirmer',
-        ButtonStyle.Success,
-      ],
-      [
-        'zm:cancel',
-        'Annuler',
-        ButtonStyle.Danger,
-      ]
+      ['zm:confirm', 'Confirmer', ButtonStyle.Success],
+      ['zm:cancel', 'Annuler', ButtonStyle.Danger]
     ),
   ];
 }
@@ -275,9 +283,7 @@ async function showPreview(channel, session) {
       ...publishControls(session),
     ],
 
-    allowedMentions: {
-      parse: [],
-    },
+    allowedMentions: { parse: [] },
   });
 
   session.previewMessageId = preview.id;
@@ -291,9 +297,7 @@ async function showPreview(channel, session) {
 
 const command = new SlashCommandBuilder()
   .setName('vouch')
-  .setDescription(
-    'Créer un vouch Zerx Market'
-  );
+  .setDescription('Créer un vouch Zerx Market');
 
 // =====================================
 // DÉMARRAGE
@@ -319,9 +323,7 @@ client.once(Events.ClientReady, async () => {
       }
     );
 
-    console.log(
-      '✅ Commande /vouch enregistrée.'
-    );
+    console.log('✅ Commande /vouch enregistrée.');
   } catch (error) {
     console.error(
       'Erreur installation commande :',
@@ -334,356 +336,499 @@ client.once(Events.ClientReady, async () => {
 // INTERACTIONS DISCORD
 // =====================================
 
-client.on(
-  Events.InteractionCreate,
-  async (interaction) => {
-    if (
-      !interaction.isChatInputCommand() &&
-      !interaction.isButton() &&
-      !interaction.isModalSubmit() &&
-      !interaction.isChannelSelectMenu()
-    ) {
-      return;
+client.on(Events.InteractionCreate, async (interaction) => {
+  if (
+    !interaction.isChatInputCommand() &&
+    !interaction.isButton() &&
+    !interaction.isModalSubmit() &&
+    !interaction.isChannelSelectMenu()
+  ) {
+    return;
+  }
+
+  try {
+    // PROPRIÉTAIRE UNIQUEMENT
+    if (interaction.user.id !== OWNER_ID) {
+      return interaction.reply({
+        content: '⛔ Tu ne peux pas utiliser ce bot.',
+        flags: MessageFlags.Ephemeral,
+      });
     }
 
-    try {
-      // SÉCURITÉ : PROPRIÉTAIRE UNIQUEMENT
-      if (interaction.user.id !== OWNER_ID) {
+    // SERVEUR AUTORISÉ UNIQUEMENT
+    if (
+      !interaction.inGuild() ||
+      interaction.guildId !== GUILD_ID
+    ) {
+      return interaction.reply({
+        content: '⛔ Serveur non autorisé.',
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
+    // =================================
+    // 1. COMMANDE /VOUCH
+    // =================================
+
+    if (interaction.isChatInputCommand()) {
+      if (interaction.commandName !== 'vouch') {
+        return;
+      }
+
+      sessions.set(OWNER_ID, {
+        step: 'type',
+        channelId: interaction.channelId,
+        updated: Date.now(),
+        photos: [],
+        targetChannelId: null,
+      });
+
+      return interaction.reply({
+        content: '📋 **De quel type est ce vouch ?**',
+
+        components: [
+          rowButtons(
+            ['zm:rf', 'RF', ButtonStyle.Primary],
+            ['zm:ue', 'UE (bientôt)', ButtonStyle.Success]
+          ),
+        ],
+
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
+    // =================================
+    // UE : BIENTÔT
+    // =================================
+
+    if (
+      interaction.isButton() &&
+      interaction.customId === 'zm:ue'
+    ) {
+      return interaction.reply({
+        content: '🟢 UE sera ajouté plus tard.',
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
+    const session = getSession();
+
+    if (
+      !session ||
+      session.channelId !== interaction.channelId
+    ) {
+      return interaction.reply({
+        content:
+          '⌛ Session expirée. Recommence avec `/vouch`.',
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
+    // =================================
+    // 2. RF -> FORMULAIRE
+    // =================================
+
+    if (
+      interaction.isButton() &&
+      interaction.customId === 'zm:rf'
+    ) {
+      if (session.step !== 'type') {
         return interaction.reply({
-          content:
-            '⛔ Tu ne peux pas utiliser ce bot.',
+          content: 'Ce formulaire a déjà été ouvert.',
           flags: MessageFlags.Ephemeral,
         });
       }
 
-      // SÉCURITÉ : SERVEUR MARKET
-      if (
-        !interaction.inGuild() ||
-        interaction.guildId !== GUILD_ID
-      ) {
+      session.step = 'form';
+      touch(session);
+
+      const modal = new ModalBuilder()
+        .setCustomId('zm:form')
+        .setTitle('Vouch Zerx Market');
+
+      modal.addComponents(
+        // NOM DU SITE
+        new ActionRowBuilder().addComponents(
+          new TextInputBuilder()
+            .setCustomId('site')
+            .setLabel('Nom du Site')
+            .setPlaceholder('Ex : Amazon.fr')
+            .setStyle(TextInputStyle.Short)
+            .setMaxLength(100)
+            .setRequired(true)
+        ),
+
+        // MONTANT
+        new ActionRowBuilder().addComponents(
+          new TextInputBuilder()
+            .setCustomId('amount')
+            .setLabel('Montant')
+            .setPlaceholder('Ex : 250')
+            .setStyle(TextInputStyle.Short)
+            .setMaxLength(40)
+            .setRequired(true)
+        ),
+
+        // NOUVEAU : LIEN DU SITE FACULTATIF
+        new ActionRowBuilder().addComponents(
+          new TextInputBuilder()
+            .setCustomId('siteUrl')
+            .setLabel('Lien du site (facultatif)')
+            .setPlaceholder('https://www.amazon.fr')
+            .setStyle(TextInputStyle.Short)
+            .setMaxLength(500)
+            .setRequired(false)
+        ),
+
+        // COMMENTAIRE FACULTATIF
+        new ActionRowBuilder().addComponents(
+          new TextInputBuilder()
+            .setCustomId('comment')
+            .setLabel('Commentaire (optionnel)')
+            .setPlaceholder('Donne ton avis...')
+            .setStyle(TextInputStyle.Paragraph)
+            .setMaxLength(900)
+            .setRequired(false)
+        )
+      );
+
+      return interaction.showModal(modal);
+    }
+
+    // =================================
+    // 3. FORMULAIRE -> PREMIÈRE PHOTO
+    // =================================
+
+    if (
+      interaction.isModalSubmit() &&
+      interaction.customId === 'zm:form'
+    ) {
+      if (session.step !== 'form') {
         return interaction.reply({
-          content:
-            '⛔ Serveur non autorisé.',
+          content: 'Formulaire déjà traité.',
           flags: MessageFlags.Ephemeral,
         });
       }
 
-      // =================================
-      // 1. COMMANDE /VOUCH
-      // =================================
+      const rawSiteUrl =
+        interaction.fields.getTextInputValue('siteUrl');
 
-      if (interaction.isChatInputCommand()) {
-        if (
-          interaction.commandName !== 'vouch'
-        ) {
-          return;
-        }
+      const siteUrl = normalizeSiteUrl(rawSiteUrl);
 
-        sessions.set(OWNER_ID, {
-          step: 'type',
-          channelId: interaction.channelId,
-          updated: Date.now(),
-          photos: [],
-          targetChannelId: null,
-        });
-
-        return interaction.reply({
-          content:
-            '📋 **De quel type est ce vouch ?**',
-
-          components: [
-            rowButtons(
-              [
-                'zm:rf',
-                'RF',
-                ButtonStyle.Primary,
-              ],
-              [
-                'zm:ue',
-                'UE (bientôt)',
-                ButtonStyle.Success,
-              ]
-            ),
-          ],
-
-          flags: MessageFlags.Ephemeral,
-        });
-      }
-
-      // =================================
-      // UE : PLUS TARD
-      // =================================
-
-      if (
-        interaction.isButton() &&
-        interaction.customId === 'zm:ue'
-      ) {
-        return interaction.reply({
-          content:
-            '🟢 UE sera ajouté plus tard.',
-          flags: MessageFlags.Ephemeral,
-        });
-      }
-
-      const session = getSession();
-
-      if (
-        !session ||
-        session.channelId !==
-          interaction.channelId
-      ) {
-        return interaction.reply({
-          content:
-            '⌛ Session expirée. Recommence avec `/vouch`.',
-          flags: MessageFlags.Ephemeral,
-        });
-      }
-
-      // =================================
-      // 2. RF -> FORMULAIRE
-      // =================================
-
-      if (
-        interaction.isButton() &&
-        interaction.customId === 'zm:rf'
-      ) {
-        if (session.step !== 'type') {
-          return interaction.reply({
-            content:
-              'Ce formulaire a déjà été ouvert.',
-            flags: MessageFlags.Ephemeral,
-          });
-        }
-
-        session.step = 'form';
+      if (siteUrl === null) {
+        session.step = 'type';
         touch(session);
 
-        const modal = new ModalBuilder()
-          .setCustomId('zm:form')
-          .setTitle('Vouch Zerx Market');
+        return interaction.reply({
+          content:
+            '❌ Le lien du site doit commencer par `https://` ou `http://`. Recommence avec `/vouch` pour saisir un lien valide.',
+          flags: MessageFlags.Ephemeral,
+        });
+      }
 
-        modal.addComponents(
-          new ActionRowBuilder().addComponents(
-            new TextInputBuilder()
-              .setCustomId('site')
-              .setLabel('Nom du Site')
-              .setPlaceholder(
-                'Ex : Zooplus.fr'
-              )
-              .setStyle(
-                TextInputStyle.Short
-              )
-              .setMaxLength(100)
-              .setRequired(true)
+      session.site =
+        interaction.fields.getTextInputValue('site');
+
+      session.amount =
+        interaction.fields.getTextInputValue('amount');
+
+      session.siteUrl = siteUrl;
+
+      session.comment =
+        interaction.fields.getTextInputValue('comment') || '';
+
+      session.step = 'photo1';
+      touch(session);
+
+      return interaction.reply({
+        content:
+          '📸 **Envoie maintenant ta première photo dans ce salon.**',
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
+    // =================================
+    // 4. DEUXIÈME PHOTO : OUI
+    // =================================
+
+    if (
+      interaction.isButton() &&
+      interaction.customId === 'zm:photo2yes'
+    ) {
+      if (session.step !== 'ask2') {
+        return interaction.reply({
+          content: 'Cette étape est terminée.',
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+
+      session.step = 'photo2';
+      touch(session);
+
+      return interaction.update({
+        content:
+          '📸 **Envoie maintenant ta deuxième photo dans ce salon.**',
+        components: [],
+      });
+    }
+
+    // =================================
+    // 5. DEUXIÈME PHOTO : NON
+    // =================================
+
+    if (
+      interaction.isButton() &&
+      interaction.customId === 'zm:photo2no'
+    ) {
+      if (session.step !== 'ask2') {
+        return interaction.reply({
+          content: 'Cette étape est terminée.',
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+
+      session.step = 'processing';
+
+      await interaction.update({
+        content:
+          '✅ Préparation de la prévisualisation...',
+        components: [],
+      });
+
+      return showPreview(
+        interaction.channel,
+        session
+      );
+    }
+
+    // =================================
+    // 6. CHOIX DU SALON
+    // =================================
+
+    if (
+      interaction.isChannelSelectMenu() &&
+      interaction.customId === 'zm:channel'
+    ) {
+      if (
+        session.step !== 'preview' ||
+        session.previewMessageId !== interaction.message.id
+      ) {
+        return interaction.reply({
+          content: 'Prévisualisation inactive.',
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+
+      const target = await interaction.guild.channels
+        .fetch(interaction.values[0])
+        .catch(() => null);
+
+      if (!target || !target.send) {
+        return interaction.reply({
+          content: '⛔ Salon non compatible.',
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+
+      const botMember =
+        await interaction.guild.members.fetchMe();
+
+      const permissions =
+        target.permissionsFor(botMember);
+
+      const needed = [
+        PermissionFlagsBits.ViewChannel,
+        PermissionFlagsBits.SendMessages,
+        PermissionFlagsBits.AttachFiles,
+        PermissionFlagsBits.EmbedLinks,
+      ];
+
+      if (!permissions?.has(needed)) {
+        return interaction.reply({
+          content:
+            '⛔ Le bot manque de permissions dans ce salon.',
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+
+      session.targetChannelId = target.id;
+      touch(session);
+
+      return interaction.update({
+        components: [
+          new TextDisplayBuilder().setContent(
+            '### 👀 Prévisualisation du vouch RF'
           ),
 
-          new ActionRowBuilder().addComponents(
-            new TextInputBuilder()
-              .setCustomId('amount')
-              .setLabel('Montant')
-              .setPlaceholder('Ex : 125')
-              .setStyle(
-                TextInputStyle.Short
-              )
-              .setMaxLength(40)
-              .setRequired(true)
+          ...buildVouch(
+            session,
+            session.photos.map((photo) => photo.url)
           ),
 
-          new ActionRowBuilder().addComponents(
-            new TextInputBuilder()
-              .setCustomId('comment')
-              .setLabel(
-                'Commentaire (optionnel)'
-              )
-              .setPlaceholder(
-                'Donne ton avis...'
-              )
-              .setStyle(
-                TextInputStyle.Paragraph
-              )
-              .setMaxLength(900)
-              .setRequired(false)
-          )
-        );
+          new TextDisplayBuilder().setContent(
+            `📢 **Publication dans :** <#${target.id}>`
+          ),
 
-        return interaction.showModal(
-          modal
-        );
-      }
+          ...publishControls(session),
+        ],
 
-      // =================================
-      // 3. FORMULAIRE -> PHOTO 1
-      // =================================
+        allowedMentions: { parse: [] },
+      });
+    }
 
+    // =================================
+    // 7. ANNULER
+    // =================================
+
+    if (
+      interaction.isButton() &&
+      interaction.customId === 'zm:cancel'
+    ) {
       if (
-        interaction.isModalSubmit() &&
-        interaction.customId === 'zm:form'
+        session.step !== 'preview' ||
+        session.previewMessageId !== interaction.message.id
       ) {
-        if (session.step !== 'form') {
-          return interaction.reply({
-            content:
-              'Formulaire déjà traité.',
-            flags: MessageFlags.Ephemeral,
-          });
-        }
-
-        session.site =
-          interaction.fields
-            .getTextInputValue('site');
-
-        session.amount =
-          interaction.fields
-            .getTextInputValue('amount');
-
-        session.comment =
-          interaction.fields
-            .getTextInputValue('comment') ||
-          '';
-
-        session.step = 'photo1';
-        touch(session);
-
         return interaction.reply({
-          content:
-            '📸 **Envoie maintenant ta première photo dans ce salon.**',
+          content: 'Prévisualisation inactive.',
           flags: MessageFlags.Ephemeral,
         });
       }
 
-      // =================================
-      // 4. DEUXIÈME PHOTO : OUI
-      // =================================
+      sessions.delete(OWNER_ID);
 
+      return interaction.update({
+        components: [
+          new TextDisplayBuilder().setContent(
+            '❌ **Vouch annulé. Rien n’a été publié.**'
+          ),
+        ],
+      });
+    }
+
+    // =================================
+    // 8. CONFIRMER ET PUBLIER
+    // =================================
+
+    if (
+      interaction.isButton() &&
+      interaction.customId === 'zm:confirm'
+    ) {
       if (
-        interaction.isButton() &&
-        interaction.customId ===
-          'zm:photo2yes'
+        session.step !== 'preview' ||
+        session.previewMessageId !== interaction.message.id
       ) {
-        if (session.step !== 'ask2') {
-          return interaction.reply({
-            content:
-              'Cette étape est terminée.',
-            flags: MessageFlags.Ephemeral,
-          });
-        }
-
-        session.step = 'photo2';
-        touch(session);
-
-        return interaction.update({
-          content:
-            '📸 **Envoie maintenant ta deuxième photo dans ce salon.**',
-          components: [],
+        return interaction.reply({
+          content: 'Prévisualisation inactive.',
+          flags: MessageFlags.Ephemeral,
         });
       }
 
-      // =================================
-      // 5. DEUXIÈME PHOTO : NON
-      // =================================
-
-      if (
-        interaction.isButton() &&
-        interaction.customId ===
-          'zm:photo2no'
-      ) {
-        if (session.step !== 'ask2') {
-          return interaction.reply({
-            content:
-              'Cette étape est terminée.',
-            flags: MessageFlags.Ephemeral,
-          });
-        }
-
-        session.step = 'processing';
-
-        await interaction.update({
+      if (!session.targetChannelId) {
+        return interaction.reply({
           content:
-            '✅ Préparation de la prévisualisation...',
-          components: [],
+            '📢 Choisis d’abord le salon de publication.',
+          flags: MessageFlags.Ephemeral,
         });
-
-        return showPreview(
-          interaction.channel,
-          session
-        );
       }
 
-      // =================================
-      // 6. CHOIX DU SALON
-      // =================================
+      session.step = 'publishing';
+      touch(session);
 
-      if (
-        interaction.isChannelSelectMenu() &&
-        interaction.customId ===
-          'zm:channel'
-      ) {
-        if (
-          session.step !== 'preview' ||
-          session.previewMessageId !==
-            interaction.message.id
-        ) {
-          return interaction.reply({
-            content:
-              'Prévisualisation inactive.',
-            flags: MessageFlags.Ephemeral,
-          });
-        }
+      await interaction.deferUpdate();
 
+      try {
         const target =
-          await interaction.guild.channels
-            .fetch(
-              interaction.values[0]
-            )
-            .catch(() => null);
-
-        if (
-          !target ||
-          !target.send
-        ) {
-          return interaction.reply({
-            content:
-              '⛔ Salon non compatible.',
-            flags: MessageFlags.Ephemeral,
-          });
-        }
-
-        const botMember =
-          await interaction.guild.members
-            .fetchMe();
-
-        const permissions =
-          target.permissionsFor(
-            botMember
+          await interaction.guild.channels.fetch(
+            session.targetChannelId
           );
 
-        const needed = [
-          PermissionFlagsBits.ViewChannel,
-          PermissionFlagsBits.SendMessages,
-          PermissionFlagsBits.AttachFiles,
-          PermissionFlagsBits.EmbedLinks,
-        ];
-
-        if (
-          !permissions?.has(needed)
-        ) {
-          return interaction.reply({
-            content:
-              '⛔ Le bot manque de permissions dans ce salon.',
-            flags: MessageFlags.Ephemeral,
-          });
+        if (!target?.send) {
+          throw new Error('Salon indisponible');
         }
 
-        session.targetChannelId =
-          target.id;
+        const files = [];
+        const photoUrls = [];
 
-        touch(session);
+        // Télécharger les photos et les joindre
+        // au message final.
+        for (
+          let n = 0;
+          n < session.photos.length;
+          n++
+        ) {
+          const photo = session.photos[n];
 
-        return interaction.update({
+          const response = await fetch(photo.url);
+
+          if (!response.ok) {
+            throw new Error(
+              'Téléchargement de photo impossible'
+            );
+          }
+
+          const buffer = Buffer.from(
+            await response.arrayBuffer()
+          );
+
+          if (buffer.length > MAX_IMAGE_BYTES) {
+            throw new Error('Photo trop volumineuse');
+          }
+
+          const filename =
+            `zerx-market-${n + 1}.${photo.ext}`;
+
+          files.push(
+            new AttachmentBuilder(buffer, {
+              name: filename,
+            })
+          );
+
+          photoUrls.push(
+            `attachment://${filename}`
+          );
+        }
+
+        const published = await target.send({
+          flags: MessageFlags.IsComponentsV2,
+
+          components: buildVouch(
+            session,
+            photoUrls
+          ),
+
+          files,
+
+          allowedMentions: { parse: [] },
+        });
+
+        sessions.delete(OWNER_ID);
+
+        await interaction.message.edit({
           components: [
-            new TextDisplayBuilder()
-              .setContent(
-                '### 👀 Prévisualisation du vouch RF'
-              ),
+            new TextDisplayBuilder().setContent(
+              [
+                '## ✅ Vouch RF publié !',
+                '',
+                `📢 Salon : <#${target.id}>`,
+                `🔗 [Voir le vouch publié](${published.url})`,
+              ].join('\n')
+            ),
+          ],
+        });
+
+      } catch (error) {
+        console.error(
+          'Erreur publication :',
+          error
+        );
+
+        session.step = 'preview';
+
+        await interaction.message.edit({
+          components: [
+            new TextDisplayBuilder().setContent(
+              '❌ **Publication impossible. Réessaie.**'
+            ),
 
             ...buildVouch(
               session,
@@ -692,375 +837,111 @@ client.on(
               )
             ),
 
-            new TextDisplayBuilder()
-              .setContent(
-                `📢 **Publication dans :** <#${target.id}>`
-              ),
-
-            ...publishControls(
-              session
-            ),
+            ...publishControls(session),
           ],
-
-          allowedMentions: {
-            parse: [],
-          },
-        });
+        }).catch(() => {});
       }
 
-      // =================================
-      // 7. ANNULER
-      // =================================
+      return;
+    }
 
-      if (
-        interaction.isButton() &&
-        interaction.customId ===
-          'zm:cancel'
-      ) {
-        if (
-          session.step !== 'preview' ||
-          session.previewMessageId !==
-            interaction.message.id
-        ) {
-          return interaction.reply({
-            content:
-              'Prévisualisation inactive.',
-            flags: MessageFlags.Ephemeral,
-          });
-        }
+  } catch (error) {
+    console.error('Erreur interaction :', error);
 
-        sessions.delete(OWNER_ID);
+    const payload = {
+      content:
+        '❌ Une erreur est survenue. Réessaie.',
+      flags: MessageFlags.Ephemeral,
+    };
 
-        return interaction.update({
-          components: [
-            new TextDisplayBuilder()
-              .setContent(
-                '❌ **Vouch annulé. Rien n’a été publié.**'
-              ),
-          ],
-        });
-      }
-
-      // =================================
-      // 8. CONFIRMER ET PUBLIER
-      // =================================
-
-      if (
-        interaction.isButton() &&
-        interaction.customId ===
-          'zm:confirm'
-      ) {
-        if (
-          session.step !== 'preview' ||
-          session.previewMessageId !==
-            interaction.message.id
-        ) {
-          return interaction.reply({
-            content:
-              'Prévisualisation inactive.',
-            flags: MessageFlags.Ephemeral,
-          });
-        }
-
-        if (
-          !session.targetChannelId
-        ) {
-          return interaction.reply({
-            content:
-              '📢 Choisis d’abord le salon de publication.',
-            flags: MessageFlags.Ephemeral,
-          });
-        }
-
-        session.step = 'publishing';
-        touch(session);
-
-        await interaction.deferUpdate();
-
-        try {
-          const target =
-            await interaction.guild.channels
-              .fetch(
-                session.targetChannelId
-              );
-
-          if (!target?.send) {
-            throw new Error(
-              'Salon indisponible'
-            );
-          }
-
-          const files = [];
-          const photoUrls = [];
-
-          // Télécharger et joindre les
-          // véritables photos au message.
-          for (
-            let n = 0;
-            n < session.photos.length;
-            n++
-          ) {
-            const photo =
-              session.photos[n];
-
-            const response =
-              await fetch(photo.url);
-
-            if (!response.ok) {
-              throw new Error(
-                'Téléchargement de photo impossible'
-              );
-            }
-
-            const buffer =
-              Buffer.from(
-                await response.arrayBuffer()
-              );
-
-            if (
-              buffer.length >
-              MAX_IMAGE_BYTES
-            ) {
-              throw new Error(
-                'Photo trop volumineuse'
-              );
-            }
-
-            const filename =
-              `zerx-market-${n + 1}.${photo.ext}`;
-
-            files.push(
-              new AttachmentBuilder(
-                buffer,
-                {
-                  name: filename,
-                }
-              )
-            );
-
-            photoUrls.push(
-              `attachment://${filename}`
-            );
-          }
-
-          const published =
-            await target.send({
-              flags:
-                MessageFlags.IsComponentsV2,
-
-              components:
-                buildVouch(
-                  session,
-                  photoUrls
-                ),
-
-              files,
-
-              allowedMentions: {
-                parse: [],
-              },
-            });
-
-          sessions.delete(
-            OWNER_ID
-          );
-
-          await interaction.message.edit({
-            components: [
-              new TextDisplayBuilder()
-                .setContent(
-                  [
-                    '## ✅ Vouch RF publié !',
-                    '',
-                    `📢 Salon : <#${target.id}>`,
-                    `🔗 [Voir le vouch publié](${published.url})`,
-                  ].join('\n')
-                ),
-            ],
-          });
-        } catch (error) {
-          console.error(
-            'Erreur publication :',
-            error
-          );
-
-          session.step =
-            'preview';
-
-          await interaction.message
-            .edit({
-              components: [
-                new TextDisplayBuilder()
-                  .setContent(
-                    '❌ **Publication impossible. Réessaie.**'
-                  ),
-
-                ...buildVouch(
-                  session,
-                  session.photos.map(
-                    (photo) =>
-                      photo.url
-                  )
-                ),
-
-                ...publishControls(
-                  session
-                ),
-              ],
-            })
-            .catch(() => {});
-        }
-
-        return;
-      }
-    } catch (error) {
-      console.error(
-        'Erreur interaction :',
-        error
-      );
-
-      const payload = {
-        content:
-          '❌ Une erreur est survenue. Réessaie.',
-        flags:
-          MessageFlags.Ephemeral,
-      };
-
-      if (
-        interaction.replied ||
-        interaction.deferred
-      ) {
-        await interaction
-          .followUp(payload)
-          .catch(() => {});
-      } else {
-        await interaction
-          .reply(payload)
-          .catch(() => {});
-      }
+    if (
+      interaction.replied ||
+      interaction.deferred
+    ) {
+      await interaction.followUp(payload).catch(() => {});
+    } else {
+      await interaction.reply(payload).catch(() => {});
     }
   }
-);
+});
 
 // =====================================
 // RÉCEPTION DES PHOTOS
 // =====================================
 
-client.on(
-  Events.MessageCreate,
-  async (message) => {
-    if (
-      message.author.bot ||
-      message.author.id !==
-        OWNER_ID ||
-      message.guildId !==
-        GUILD_ID
-    ) {
-      return;
-    }
-
-    const session =
-      getSession();
-
-    if (
-      !session ||
-      session.channelId !==
-        message.channelId ||
-      ![
-        'photo1',
-        'photo2',
-      ].includes(
-        session.step
-      )
-    ) {
-      return;
-    }
-
-    const attachment =
-      getImage(message);
-
-    if (!attachment) return;
-
-    if (
-      attachment.size &&
-      attachment.size >
-        MAX_IMAGE_BYTES
-    ) {
-      return message.reply(
-        '❌ Photo trop volumineuse. Utilise une image de moins de 8 Mo.'
-      );
-    }
-
-    const previousStep =
-      session.step;
-
-    session.step =
-      'processing';
-
-    touch(session);
-
-    session.photos.push({
-      url:
-        attachment.url,
-      ext:
-        getExtension(
-          attachment
-        ),
-    });
-
-    try {
-      if (
-        previousStep ===
-        'photo1'
-      ) {
-        session.step =
-          'ask2';
-
-        touch(session);
-
-        await message.reply({
-          content:
-            '📸 **As-tu une 2e photo à ajouter ?**',
-
-          components: [
-            rowButtons(
-              [
-                'zm:photo2yes',
-                'Oui',
-                ButtonStyle.Success,
-              ],
-              [
-                'zm:photo2no',
-                'Non',
-                ButtonStyle.Danger,
-              ]
-            ),
-          ],
-        });
-      } else {
-        await showPreview(
-          message.channel,
-          session
-        );
-      }
-    } catch (error) {
-      console.error(
-        'Erreur photo :',
-        error
-      );
-
-      session.photos.pop();
-      session.step =
-        previousStep;
-
-      await message
-        .reply(
-          '❌ Impossible de traiter la photo. Réessaie.'
-        )
-        .catch(() => {});
-    }
+client.on(Events.MessageCreate, async (message) => {
+  if (
+    message.author.bot ||
+    message.author.id !== OWNER_ID ||
+    message.guildId !== GUILD_ID
+  ) {
+    return;
   }
-);
+
+  const session = getSession();
+
+  if (
+    !session ||
+    session.channelId !== message.channelId ||
+    !['photo1', 'photo2'].includes(session.step)
+  ) {
+    return;
+  }
+
+  const attachment = getImage(message);
+
+  if (!attachment) return;
+
+  if (
+    attachment.size &&
+    attachment.size > MAX_IMAGE_BYTES
+  ) {
+    return message.reply(
+      '❌ Photo trop volumineuse. Utilise une image de moins de 8 Mo.'
+    );
+  }
+
+  const previousStep = session.step;
+
+  session.step = 'processing';
+  touch(session);
+
+  session.photos.push({
+    url: attachment.url,
+    ext: getExtension(attachment),
+  });
+
+  try {
+    if (previousStep === 'photo1') {
+      session.step = 'ask2';
+      touch(session);
+
+      await message.reply({
+        content:
+          '📸 **As-tu une 2e photo à ajouter ?**',
+
+        components: [
+          rowButtons(
+            ['zm:photo2yes', 'Oui', ButtonStyle.Success],
+            ['zm:photo2no', 'Non', ButtonStyle.Danger]
+          ),
+        ],
+      });
+    } else {
+      await showPreview(message.channel, session);
+    }
+
+  } catch (error) {
+    console.error('Erreur photo :', error);
+
+    session.photos.pop();
+    session.step = previousStep;
+
+    await message.reply(
+      '❌ Impossible de traiter la photo. Réessaie.'
+    ).catch(() => {});
+  }
+});
 
 // =====================================
 // CONNEXION
