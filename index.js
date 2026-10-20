@@ -32,6 +32,7 @@ const {
 
 const TOKEN = process.env.DISCORD_TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
+
 const GUILD_ID =
   process.env.GUILD_ID || '1195047756910309456';
 
@@ -123,7 +124,7 @@ function normalizeSiteUrl(value) {
   }
 }
 
-function getTitle(session) {
+function getRFTitle(session) {
   const site = escapeMarkdown(session.site)
     .toUpperCase()
     .replace(/\n/g, ' ');
@@ -162,13 +163,13 @@ function getExtension(attachment) {
 }
 
 // =====================================
-// DESIGN DU VOUCH - COMPONENTS V2
+// DESIGN DU VOUCH RF
 // =====================================
 
-function buildVouch(session, photoUrls) {
+function buildRFVouch(session, photoUrls) {
   const container = new ContainerBuilder();
 
-  // 1. PHOTOS EN HAUT
+  // PHOTOS EN HAUT
   const gallery = new MediaGalleryBuilder();
 
   for (const url of photoUrls) {
@@ -177,15 +178,14 @@ function buildVouch(session, photoUrls) {
 
   container.addMediaGalleryComponents(gallery);
 
-  // 2. TITRE LÉGÈREMENT PLUS PETIT
-  // ### au lieu de ##
+  // TITRE LÉGÈREMENT PLUS PETIT
   container.addTextDisplayComponents(
     new TextDisplayBuilder().setContent(
-      `### ${getTitle(session)}`
+      `### ${getRFTitle(session)}`
     )
   );
 
-  // 3. COMMENTAIRE FACULTATIF
+  // COMMENTAIRE FACULTATIF
   if (session.comment && session.comment.trim()) {
     container.addTextDisplayComponents(
       new TextDisplayBuilder().setContent(
@@ -194,21 +194,19 @@ function buildVouch(session, photoUrls) {
     );
   }
 
-  // 4. UNE SEULE LIGNE INVISIBLE
+  // UNE SEULE LIGNE INVISIBLE
   container.addTextDisplayComponents(
-    new TextDisplayBuilder().setContent(
-      '\u200B'
-    )
+    new TextDisplayBuilder().setContent('\u200B')
   );
 
-  // 5. BARRE HORIZONTALE
+  // BARRE HORIZONTALE
   container.addSeparatorComponents(
     new SeparatorBuilder()
       .setDivider(true)
       .setSpacing(SeparatorSpacingSize.Small)
   );
 
-  // 6. LIENS UTILES
+  // LIENS UTILES - RF UNIQUEMENT
   container.addTextDisplayComponents(
     new TextDisplayBuilder().setContent(
       [
@@ -221,8 +219,70 @@ function buildVouch(session, photoUrls) {
     )
   );
 
-  // Encadré sans bande colorée
   return [container];
+}
+
+// =====================================
+// DESIGN DU VOUCH UE
+// =====================================
+
+function buildUEVouch(session, photoUrls) {
+  const container = new ContainerBuilder();
+
+  // PHOTO DU VOUCH EN HAUT
+  const gallery = new MediaGalleryBuilder();
+
+  for (const url of photoUrls) {
+    gallery.addItems((item) => item.setURL(url));
+  }
+
+  container.addMediaGalleryComponents(gallery);
+
+  // TITRE
+  container.addTextDisplayComponents(
+    new TextDisplayBuilder().setContent(
+      '**🍕 Nouvelle livraison terminée !**'
+    )
+  );
+
+  // SÉPARATION SOUS LE TITRE
+  container.addTextDisplayComponents(
+    new TextDisplayBuilder().setContent(
+      '━━━━━━━━━━━━━'
+    )
+  );
+
+  // INFORMATIONS UE
+  container.addTextDisplayComponents(
+    new TextDisplayBuilder().setContent(
+      [
+        `👤 **Client :** ${escapeMarkdown(session.clientName)}`,
+        '',
+        `👨‍🍳 **Cuisto :** ${escapeMarkdown(session.cook)}`,
+        '',
+        `🍔 **Restaurant :** ${escapeMarkdown(session.restaurant)}`,
+        '',
+        `💵 **Total :** ${escapeMarkdown(session.price)}`,
+        '',
+        `📝 **Avis Client :** ${escapeMarkdown(session.notes)}`,
+      ].join('\n')
+    )
+  );
+
+  // PAS DE LIENS UTILES POUR UE
+  return [container];
+}
+
+// =====================================
+// CONSTRUIRE LE BON VOUCH
+// =====================================
+
+function buildVouch(session, photoUrls) {
+  if (session.type === 'UE') {
+    return buildUEVouch(session, photoUrls);
+  }
+
+  return buildRFVouch(session, photoUrls);
 }
 
 // =====================================
@@ -255,7 +315,7 @@ function publishControls(session) {
 }
 
 // =====================================
-// PRÉVISUALISATION
+// PRÉVISUALISATION RF / UE
 // =====================================
 
 async function showPreview(channel, session) {
@@ -271,7 +331,7 @@ async function showPreview(channel, session) {
 
     components: [
       new TextDisplayBuilder().setContent(
-        '### 👀 Prévisualisation du vouch RF'
+        `### 👀 Prévisualisation du vouch ${session.type}`
       ),
 
       ...buildVouch(session, photos),
@@ -300,7 +360,7 @@ const command = new SlashCommandBuilder()
   .setDescription('Créer un vouch Zerx Market');
 
 // =====================================
-// DÉMARRAGE
+// DÉMARRAGE DU BOT
 // =====================================
 
 client.once(Events.ClientReady, async () => {
@@ -377,6 +437,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       sessions.set(OWNER_ID, {
         step: 'type',
+        type: null,
         channelId: interaction.channelId,
         updated: Date.now(),
         photos: [],
@@ -389,24 +450,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
         components: [
           rowButtons(
             ['zm:rf', 'RF', ButtonStyle.Primary],
-            ['zm:ue', 'UE (bientôt)', ButtonStyle.Success]
+            ['zm:ue', 'UE', ButtonStyle.Success]
           ),
         ],
 
-        flags: MessageFlags.Ephemeral,
-      });
-    }
-
-    // =================================
-    // UE : BIENTÔT
-    // =================================
-
-    if (
-      interaction.isButton() &&
-      interaction.customId === 'zm:ue'
-    ) {
-      return interaction.reply({
-        content: '🟢 UE sera ajouté plus tard.',
         flags: MessageFlags.Ephemeral,
       });
     }
@@ -425,7 +472,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
 
     // =================================
-    // 2. RF -> FORMULAIRE
+    // 2. BOUTON RF
     // =================================
 
     if (
@@ -439,11 +486,12 @@ client.on(Events.InteractionCreate, async (interaction) => {
         });
       }
 
+      session.type = 'RF';
       session.step = 'form';
       touch(session);
 
       const modal = new ModalBuilder()
-        .setCustomId('zm:form')
+        .setCustomId('zm:form:rf')
         .setTitle('Vouch Zerx Market');
 
       modal.addComponents(
@@ -469,7 +517,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
             .setRequired(true)
         ),
 
-        // LIEN DU SITE FACULTATIF
+        // LIEN FACULTATIF
         new ActionRowBuilder().addComponents(
           new TextInputBuilder()
             .setCustomId('siteUrl')
@@ -496,14 +544,100 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
 
     // =================================
-    // 3. FORMULAIRE -> PREMIÈRE PHOTO
+    // 3. BOUTON UE
+    // =================================
+
+    if (
+      interaction.isButton() &&
+      interaction.customId === 'zm:ue'
+    ) {
+      if (session.step !== 'type') {
+        return interaction.reply({
+          content: 'Ce formulaire a déjà été ouvert.',
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+
+      session.type = 'UE';
+      session.step = 'form';
+      touch(session);
+
+      const modal = new ModalBuilder()
+        .setCustomId('zm:form:ue')
+        .setTitle('Vouch UE Zerx Market');
+
+      modal.addComponents(
+        // NOM DU CLIENT
+        new ActionRowBuilder().addComponents(
+          new TextInputBuilder()
+            .setCustomId('clientName')
+            .setLabel('Nom du Client')
+            .setPlaceholder('Ex : Paul')
+            .setStyle(TextInputStyle.Short)
+            .setMaxLength(100)
+            .setRequired(true)
+        ),
+
+        // CUISTO
+        new ActionRowBuilder().addComponents(
+          new TextInputBuilder()
+            .setCustomId('cook')
+            .setLabel('Cuisto')
+            .setPlaceholder('Ex : GordonEx')
+            .setStyle(TextInputStyle.Short)
+            .setMaxLength(100)
+            .setRequired(true)
+        ),
+
+        // NOM DU RESTAURANT
+        new ActionRowBuilder().addComponents(
+          new TextInputBuilder()
+            .setCustomId('restaurant')
+            .setLabel('Nom du Restaurant')
+            .setPlaceholder("Ex : McDonald's")
+            .setStyle(TextInputStyle.Paragraph)
+            .setMaxLength(200)
+            .setRequired(true)
+        ),
+
+        // PRIX COMMANDE
+        new ActionRowBuilder().addComponents(
+          new TextInputBuilder()
+            .setCustomId('price')
+            .setLabel('Prix commande')
+            .setPlaceholder('Ex : 40€')
+            .setStyle(TextInputStyle.Short)
+            .setMaxLength(40)
+            .setRequired(true)
+        ),
+
+        // NOTES CLIENT
+        new ActionRowBuilder().addComponents(
+          new TextInputBuilder()
+            .setCustomId('notes')
+            .setLabel('Notes Client')
+            .setValue('Pas de commentaire.')
+            .setStyle(TextInputStyle.Short)
+            .setMaxLength(500)
+            .setRequired(true)
+        )
+      );
+
+      return interaction.showModal(modal);
+    }
+
+    // =================================
+    // 4. FORMULAIRE RF
     // =================================
 
     if (
       interaction.isModalSubmit() &&
-      interaction.customId === 'zm:form'
+      interaction.customId === 'zm:form:rf'
     ) {
-      if (session.step !== 'form') {
+      if (
+        session.step !== 'form' ||
+        session.type !== 'RF'
+      ) {
         return interaction.reply({
           content: 'Formulaire déjà traité.',
           flags: MessageFlags.Ephemeral,
@@ -547,14 +681,60 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
 
     // =================================
-    // 4. DEUXIÈME PHOTO : OUI
+    // 5. FORMULAIRE UE
+    // =================================
+
+    if (
+      interaction.isModalSubmit() &&
+      interaction.customId === 'zm:form:ue'
+    ) {
+      if (
+        session.step !== 'form' ||
+        session.type !== 'UE'
+      ) {
+        return interaction.reply({
+          content: 'Formulaire déjà traité.',
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+
+      session.clientName =
+        interaction.fields.getTextInputValue('clientName');
+
+      session.cook =
+        interaction.fields.getTextInputValue('cook');
+
+      session.restaurant =
+        interaction.fields.getTextInputValue('restaurant');
+
+      session.price =
+        interaction.fields.getTextInputValue('price');
+
+      session.notes =
+        interaction.fields.getTextInputValue('notes');
+
+      session.step = 'photo1';
+      touch(session);
+
+      return interaction.reply({
+        content:
+          '📸 **Envoie maintenant ta photo vouch UE dans ce salon.**',
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
+    // =================================
+    // 6. RF : DEUXIÈME PHOTO OUI
     // =================================
 
     if (
       interaction.isButton() &&
       interaction.customId === 'zm:photo2yes'
     ) {
-      if (session.step !== 'ask2') {
+      if (
+        session.type !== 'RF' ||
+        session.step !== 'ask2'
+      ) {
         return interaction.reply({
           content: 'Cette étape est terminée.',
           flags: MessageFlags.Ephemeral,
@@ -572,14 +752,17 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
 
     // =================================
-    // 5. DEUXIÈME PHOTO : NON
+    // 7. RF : DEUXIÈME PHOTO NON
     // =================================
 
     if (
       interaction.isButton() &&
       interaction.customId === 'zm:photo2no'
     ) {
-      if (session.step !== 'ask2') {
+      if (
+        session.type !== 'RF' ||
+        session.step !== 'ask2'
+      ) {
         return interaction.reply({
           content: 'Cette étape est terminée.',
           flags: MessageFlags.Ephemeral,
@@ -601,7 +784,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
 
     // =================================
-    // 6. CHOIX DU SALON
+    // 8. CHOIX DU SALON RF / UE
     // =================================
 
     if (
@@ -656,7 +839,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
       return interaction.update({
         components: [
           new TextDisplayBuilder().setContent(
-            '### 👀 Prévisualisation du vouch RF'
+            `### 👀 Prévisualisation du vouch ${session.type}`
           ),
 
           ...buildVouch(
@@ -676,7 +859,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
 
     // =================================
-    // 7. ANNULER
+    // 9. ANNULER
     // =================================
 
     if (
@@ -705,7 +888,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
 
     // =================================
-    // 8. CONFIRMER ET PUBLIER
+    // 10. CONFIRMER ET PUBLIER
     // =================================
 
     if (
@@ -798,13 +981,15 @@ client.on(Events.InteractionCreate, async (interaction) => {
           allowedMentions: { parse: [] },
         });
 
+        const publishedType = session.type;
+
         sessions.delete(OWNER_ID);
 
         await interaction.message.edit({
           components: [
             new TextDisplayBuilder().setContent(
               [
-                '## ✅ Vouch RF publié !',
+                `## ✅ Vouch ${publishedType} publié !`,
                 '',
                 `📢 Salon : <#${target.id}>`,
                 `🔗 [Voir le vouch publié](${published.url})`,
@@ -851,7 +1036,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
       flags: MessageFlags.Ephemeral,
     };
 
-    if (interaction.replied || interaction.deferred) {
+    if (
+      interaction.replied ||
+      interaction.deferred
+    ) {
       await interaction.followUp(payload).catch(() => {});
     } else {
       await interaction.reply(payload).catch(() => {});
@@ -860,7 +1048,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 });
 
 // =====================================
-// RÉCEPTION DES PHOTOS
+// RÉCEPTION DES PHOTOS RF / UE
 // =====================================
 
 client.on(Events.MessageCreate, async (message) => {
@@ -906,7 +1094,11 @@ client.on(Events.MessageCreate, async (message) => {
   });
 
   try {
-    if (previousStep === 'photo1') {
+    // RF : DEMANDER UNE DEUXIÈME PHOTO
+    if (
+      session.type === 'RF' &&
+      previousStep === 'photo1'
+    ) {
       session.step = 'ask2';
       touch(session);
 
@@ -921,7 +1113,10 @@ client.on(Events.MessageCreate, async (message) => {
           ),
         ],
       });
+
     } else {
+      // UE : UNE SEULE PHOTO, PREVIEW DIRECTE
+      // RF : PREVIEW APRÈS LA DEUXIÈME PHOTO
       await showPreview(message.channel, session);
     }
 
