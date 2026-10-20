@@ -157,11 +157,13 @@ function buildVouch(s, photoUrls) {
     );
   }
 
-  // 4. SÉPARATEUR
+  // =====================================
+  // 4. GRAND ESPACE + LIGNE DE SÉPARATION
+  // =====================================
   components.push(
     new SeparatorBuilder()
       .setDivider(true)
-      .setSpacing(SeparatorSpacingSize.Small)
+      .setSpacing(SeparatorSpacingSize.Large)
   );
 
   // 5. LIENS UTILES
