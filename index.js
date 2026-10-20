@@ -158,12 +158,13 @@ function buildVouch(s, photoUrls) {
   }
 
   // =====================================
-  // 4. GRAND ESPACE + LIGNE DE SÉPARATION
+  // 4. ESPACEMENT AVEC CARACTÈRES INVISIBLES
+  //    AUCUNE LIGNE DE SÉPARATION
   // =====================================
   components.push(
-    new SeparatorBuilder()
-      .setDivider(true)
-      .setSpacing(SeparatorSpacingSize.Large)
+    new TextDisplayBuilder().setContent(
+      '\u200B\n\u200B\n\u200B'
+    )
   );
 
   // 5. LIENS UTILES
