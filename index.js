@@ -32,7 +32,6 @@ const {
 
 const TOKEN = process.env.DISCORD_TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
-
 const GUILD_ID =
   process.env.GUILD_ID || '1195047756910309456';
 
@@ -136,7 +135,7 @@ function getTitle(session) {
     ? amount
     : `${amount}€`;
 
-  // Seul le nom du site devient cliquable.
+  // Le lien concerne seulement le nom du site.
   const siteTitle = session.siteUrl
     ? `[${site}](${session.siteUrl})`
     : site;
@@ -178,10 +177,11 @@ function buildVouch(session, photoUrls) {
 
   container.addMediaGalleryComponents(gallery);
 
-  // 2. TITRE : LIEN SUR LE SITE UNIQUEMENT
+  // 2. TITRE LÉGÈREMENT PLUS PETIT
+  // ### au lieu de ##
   container.addTextDisplayComponents(
     new TextDisplayBuilder().setContent(
-      `## ${getTitle(session)}`
+      `### ${getTitle(session)}`
     )
   );
 
@@ -469,7 +469,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
             .setRequired(true)
         ),
 
-        // NOUVEAU : LIEN DU SITE FACULTATIF
+        // LIEN DU SITE FACULTATIF
         new ActionRowBuilder().addComponents(
           new TextInputBuilder()
             .setCustomId('siteUrl')
@@ -516,12 +516,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
       const siteUrl = normalizeSiteUrl(rawSiteUrl);
 
       if (siteUrl === null) {
-        session.step = 'type';
-        touch(session);
+        sessions.delete(OWNER_ID);
 
         return interaction.reply({
           content:
-            '❌ Le lien du site doit commencer par `https://` ou `http://`. Recommence avec `/vouch` pour saisir un lien valide.',
+            '❌ Le lien du site doit être une adresse valide commençant par `https://` ou `http://`. Recommence avec `/vouch`.',
           flags: MessageFlags.Ephemeral,
         });
       }
@@ -749,8 +748,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
         const files = [];
         const photoUrls = [];
 
-        // Télécharger les photos et les joindre
-        // au message final.
         for (
           let n = 0;
           n < session.photos.length;
@@ -854,10 +851,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
       flags: MessageFlags.Ephemeral,
     };
 
-    if (
-      interaction.replied ||
-      interaction.deferred
-    ) {
+    if (interaction.replied || interaction.deferred) {
       await interaction.followUp(payload).catch(() => {});
     } else {
       await interaction.reply(payload).catch(() => {});
