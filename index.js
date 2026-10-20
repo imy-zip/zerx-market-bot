@@ -32,7 +32,6 @@ const {
 
 const TOKEN = process.env.DISCORD_TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
-
 const GUILD_ID =
   process.env.GUILD_ID || '1195047756910309456';
 
@@ -124,24 +123,30 @@ function normalizeSiteUrl(value) {
   }
 }
 
+function formatAmount(value) {
+  const amount = escapeMarkdown(value)
+    .replace(/\n/g, ' ')
+    .trim();
+
+  // Ajoute € uniquement s'il n'est pas déjà présent.
+  return amount.includes('€')
+    ? amount
+    : `${amount}€`;
+}
+
 function getRFTitle(session) {
   const site = escapeMarkdown(session.site)
     .toUpperCase()
     .replace(/\n/g, ' ');
 
-  const amount = escapeMarkdown(session.amount)
-    .replace(/\n/g, ' ');
+  const amount = formatAmount(session.amount);
 
-  const formattedAmount = amount.includes('€')
-    ? amount
-    : `${amount}€`;
-
-  // Le lien concerne seulement le nom du site.
+  // Le lien concerne uniquement le nom du site.
   const siteTitle = session.siteUrl
     ? `[${site}](${session.siteUrl})`
     : site;
 
-  return `${siteTitle} - ${formattedAmount}`;
+  return `${siteTitle} - ${amount}`;
 }
 
 function getImage(message) {
@@ -238,18 +243,18 @@ function buildUEVouch(session, photoUrls) {
 
   container.addMediaGalleryComponents(gallery);
 
-  // TITRE
+  // TITRE UE
   container.addTextDisplayComponents(
     new TextDisplayBuilder().setContent(
       '**🍕 Nouvelle livraison terminée !**'
     )
   );
 
-  // SÉPARATION SOUS LE TITRE
-  container.addTextDisplayComponents(
-    new TextDisplayBuilder().setContent(
-      '━━━━━━━━━━━━━'
-    )
+  // VRAIE BARRE HORIZONTALE DISCORD
+  container.addSeparatorComponents(
+    new SeparatorBuilder()
+      .setDivider(true)
+      .setSpacing(SeparatorSpacingSize.Small)
   );
 
   // INFORMATIONS UE
@@ -262,7 +267,7 @@ function buildUEVouch(session, photoUrls) {
         '',
         `🍔 **Restaurant :** ${escapeMarkdown(session.restaurant)}`,
         '',
-        `💵 **Total :** ${escapeMarkdown(session.price)}`,
+        `💵 **Total :** ${formatAmount(session.price)}`,
         '',
         `📝 **Avis Client :** ${escapeMarkdown(session.notes)}`,
       ].join('\n')
@@ -605,7 +610,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
           new TextInputBuilder()
             .setCustomId('price')
             .setLabel('Prix commande')
-            .setPlaceholder('Ex : 40€')
+            .setPlaceholder('Ex : 40')
             .setStyle(TextInputStyle.Short)
             .setMaxLength(40)
             .setRequired(true)
@@ -858,9 +863,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
       });
     }
 
-    // =================================
+    // =====================================
     // 9. ANNULER
-    // =================================
+    // =====================================
 
     if (
       interaction.isButton() &&
@@ -887,9 +892,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
       });
     }
 
-    // =================================
+    // =====================================
     // 10. CONFIRMER ET PUBLIER
-    // =================================
+    // =====================================
 
     if (
       interaction.isButton() &&
@@ -1115,8 +1120,8 @@ client.on(Events.MessageCreate, async (message) => {
       });
 
     } else {
-      // UE : UNE SEULE PHOTO, PREVIEW DIRECTE
-      // RF : PREVIEW APRÈS LA DEUXIÈME PHOTO
+      // UE : UNE PHOTO -> PREVIEW DIRECTE
+      // RF : PREVIEW APRÈS LA 2E PHOTO
       await showPreview(message.channel, session);
     }
 
