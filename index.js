@@ -426,7 +426,7 @@ const commands = [
 ];
 
 // ========================================
-// CATALOGUE COMPLET - 199 ENTRÉES
+// CATALOGUE COMPLET
 // ========================================
 
 const CATALOG = [
@@ -687,7 +687,7 @@ const CATALOG = [
 ];
 
 // ========================================
-// LIENS DES BOUTIQUES
+// LIENS DE TOUTES LES BOUTIQUES
 // ========================================
 
 const SHOP_LINKS = {
@@ -901,13 +901,6 @@ const SHOP_LINKS = {
 // CATALOGUE PREMIUM - COMPONENTS V2
 // ========================================
 
-// Les Components V2 permettent :
-// - de vrais conteneurs bleus
-// - des séparateurs natifs
-// - des titres hiérarchisés
-// - des boutons de navigation
-// - des boutiques cliquables
-
 function ticket() {
   return `<#${TICKET_CHANNEL_ID}>`;
 }
@@ -1042,11 +1035,10 @@ function premiumIntro() {
 // CATÉGORIES PREMIUM
 // ========================================
 
-function splitShops(section) {
-  // Un TextDisplay Discord est limité à
-  // 4000 caractères.
-  // On garde une marge pour la mise en forme.
+// MODIFICATION : une ligne vide entre
+// chaque boutique.
 
+function splitShops(section) {
   const chunks = [];
   let current = '';
 
@@ -1054,7 +1046,7 @@ function splitShops(section) {
     const line = shopLine(name);
 
     const candidate = current
-      ? `${current}\n${line}`
+      ? `${current}\n\n${line}`
       : line;
 
     if (candidate.length > 2500 && current) {
@@ -1071,6 +1063,9 @@ function splitShops(section) {
 
   return chunks;
 }
+
+// MODIFICATION : aucun nombre de boutiques
+// affiché en bas des catégories.
 
 function premiumCategory(section, index) {
   const c = premiumContainer();
@@ -1102,8 +1097,6 @@ function premiumCategory(section, index) {
   addText(
     c,
     [
-      `✦ **${section.shops.length} boutiques**`,
-      '',
       '💬 *Une question ou une boutique introuvable ?*',
       `Consultez ${ticket()} pour les délais, limites et disponibilités.`
     ].join('\n')
@@ -1119,7 +1112,7 @@ function premiumCategory(section, index) {
 }
 
 // ========================================
-// CONCLUSION PREMIUM
+// DERNIER MESSAGE - TEXTE DEMANDÉ
 // ========================================
 
 function premiumOutro() {
@@ -1128,64 +1121,25 @@ function premiumOutro() {
   addText(
     c,
     [
-      '## 💙 ZERX MARKET',
-      '### VOTRE EXPÉRIENCE, NOTRE PRIORITÉ'
+      '⬆️ **Pensez à remonter vers le haut du salon** afin de voir l’ensemble du catalogue disponible.',
+      '',
+      '━━━━━━━━━━━━',
+      '',
+      '💬 **Vous ne trouvez pas une boutique ou vous souhaitez obtenir plus d’informations ?**',
+      '',
+      `📩 Ouvrez un ticket juste ici : ${ticket()}`,
+      '',
+      'ℹ️ **À noter :** Cette liste n’inclut pas toutes les boutiques qu’il est possible de RF. Si vous avez une boutique en tête, envoyez-nous le site via un ticket et notre équipe vérifiera si celle-ci est réalisable ou non.',
+      '',
+      '❤️ **Merci pour votre confiance !**'
     ].join('\n')
-  );
-
-  addSeparator(c);
-
-  addText(
-    c,
-    [
-      '⬆️ **Remontez dans le salon** pour parcourir toutes les catégories du catalogue.',
-      '',
-      '### ✧ Besoin d’aide ?',
-      '',
-      'Vous ne trouvez pas votre boutique ?',
-      'Vous souhaitez connaître un délai, une limite ou une disponibilité ?',
-      '',
-      `🎫 Notre équipe vous répond dans ${ticket()}.`
-    ].join('\n')
-  );
-
-  addSeparator(c);
-
-  addText(
-    c,
-    [
-      '### ✧ Une boutique manque à la liste ?',
-      '',
-      'Ce catalogue ne comprend pas nécessairement toutes les boutiques pouvant être proposées en RF.',
-      '',
-      'Envoyez-nous le lien du site via un ticket : notre équipe vérifiera si votre demande est réalisable.'
-    ].join('\n')
-  );
-
-  addSeparator(c);
-
-  addText(
-    c,
-    [
-      '**❤️ Merci pour votre confiance !**',
-      '',
-      '*Zerx Market — Catalogue officiel*'
-    ].join('\n')
-  );
-
-  c.addActionRowComponents(
-    new ActionRowBuilder().addComponents(
-      ticketButton(),
-      catalogButton(),
-      serverButton()
-    )
   );
 
   return c;
 }
 
 // ========================================
-// CONSTRUCTION DES MESSAGES PREMIUM
+// MESSAGES DU CATALOGUE
 // ========================================
 
 function catalogMessages() {
@@ -1490,7 +1444,6 @@ client.on(Events.InteractionCreate, async i => {
           });
         }
 
-        // ANTI-DOUBLE CLIC
         s.sending = true;
         s.step = 'sending';
 
@@ -1512,7 +1465,6 @@ client.on(Events.InteractionCreate, async i => {
             throw new Error('Salon inaccessible');
           }
 
-          // INTRO + 8 CATÉGORIES + CONCLUSION
           for (const payload of catalogMessages()) {
             await channel.send(payload);
             count++;
