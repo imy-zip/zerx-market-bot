@@ -23,8 +23,7 @@ const {
   SeparatorBuilder,
   SeparatorSpacingSize,
   AttachmentBuilder,
-  PermissionFlagsBits,
-  EmbedBuilder
+  PermissionFlagsBits
 } = require('discord.js');
 
 // ========================================
@@ -38,7 +37,13 @@ const GUILD_ID =
   process.env.GUILD_ID || '1195047756910309456';
 
 const OWNER_ID = '1195042683064942624';
+
 const TICKET_CHANNEL_ID = '1195054777025958008';
+const CATALOG_CHANNEL_ID = '1195054550588076176';
+
+const SERVER_INVITE = 'https://discord.gg/zYCc9fDZ3C';
+
+const PREMIUM_BLUE = 0x254C91;
 
 const SESSION_TIMEOUT = 15 * 60 * 1000;
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
@@ -62,7 +67,7 @@ const client = new Client({
 });
 
 // ========================================
-// OUTILS
+// FONCTIONS UTILES
 // ========================================
 
 function getSession() {
@@ -160,7 +165,7 @@ function extOf(attachment) {
 }
 
 // ========================================
-// PRÉPARATION DES PHOTOS
+// PHOTOS
 // ========================================
 
 async function prepPhoto(attachment) {
@@ -254,9 +259,9 @@ function buildRF(s, urls) {
     new TextDisplayBuilder().setContent([
       '**Liens utiles :**',
       '',
-      '🛒 Liste boutiques : <#1195054550588076176>',
-      '📩 Me contacter : <#1195054777025958008>',
-      '📢 Partager le serveur : https://discord.gg/zYCc9fDZ3C'
+      `🛒 Liste boutiques : <#${CATALOG_CHANNEL_ID}>`,
+      `📩 Me contacter : <#${TICKET_CHANNEL_ID}>`,
+      `📢 Partager le serveur : ${SERVER_INVITE}`
     ].join('\n'))
   );
 
@@ -416,17 +421,18 @@ const commands = [
   new SlashCommandBuilder()
     .setName('message')
     .setDescription(
-      'Publier le catalogue des boutiques Zerx Market'
+      'Publier le catalogue Premium Zerx Market'
     )
 ];
 
 // ========================================
-// CATALOGUE COMPLET
+// CATALOGUE COMPLET - 199 ENTRÉES
 // ========================================
 
 const CATALOG = [
   {
     title: '👕 Mode',
+    subtitle: 'Prêt-à-porter, sneakers & accessoires',
     shops: [
       'Adidas',
       'COS',
@@ -488,14 +494,13 @@ const CATALOG = [
       'StockX',
       '4Elementos',
       'Zadig & Voltaire',
-
-      // NOUVEAU
       'La Redoute'
     ]
   },
 
   {
     title: '💻 High-Tech & Gaming',
+    subtitle: 'Technologie, gaming & équipements',
     shops: [
       'Amazon',
       'Apple',
@@ -531,8 +536,6 @@ const CATALOG = [
       'Eardopes',
       'Mous',
       'MovaTech',
-
-      // NOUVEAUX
       'Garmin',
       'SteamOne'
     ]
@@ -540,6 +543,7 @@ const CATALOG = [
 
   {
     title: '💎 Luxe',
+    subtitle: 'Maisons de luxe & créateurs',
     shops: [
       'Tiffany & Co.',
       'Prada',
@@ -572,6 +576,7 @@ const CATALOG = [
 
   {
     title: '💄 Beauté & Bien-être',
+    subtitle: 'Parfums, cosmétiques & soins',
     shops: [
       'Sephora',
       'Nocibé',
@@ -588,14 +593,13 @@ const CATALOG = [
       'Chogan',
       'Fragrance',
       'Manscaped',
-
-      // NOUVEAU
       'Flaconi'
     ]
   },
 
   {
     title: '🏋️ Sport & Musculation',
+    subtitle: 'Performance, fitness & outdoor',
     shops: [
       'Lululemon',
       'Alo Yoga',
@@ -619,8 +623,6 @@ const CATALOG = [
       'SnowLeader',
       'DopeSnow',
       'Nocta',
-
-      // NOUVEAUX
       'Decathlon',
       'Alpiniste'
     ]
@@ -628,6 +630,7 @@ const CATALOG = [
 
   {
     title: '💍 Bijoux & Horlogerie',
+    subtitle: 'Bijoux, montres & accessoires précieux',
     shops: [
       'Tiffany & Co.',
       '58 Facettes',
@@ -644,6 +647,7 @@ const CATALOG = [
 
   {
     title: '🏠 Maison & Lifestyle',
+    subtitle: 'Maison, décoration & quotidien',
     shops: [
       'Wine in Black',
       'KitchenAid',
@@ -655,8 +659,6 @@ const CATALOG = [
       'Ring',
       'Zooplus',
       'Maxi Zoo',
-
-      // NOUVEAUX
       'Onyx Cookware',
       'ManoMano',
       'Nespresso'
@@ -665,6 +667,7 @@ const CATALOG = [
 
   {
     title: '🎁 Divers',
+    subtitle: 'Découvertes, cadeaux & autres boutiques',
     shops: [
       'Amazon',
       'PayPal',
@@ -678,15 +681,13 @@ const CATALOG = [
       'Aniioki',
       'Le Petit Vapoteur',
       'Air Up',
-
-      // NOUVEAU
       'AliExpress'
     ]
   }
 ];
 
 // ========================================
-// LIENS DE TOUTES LES BOUTIQUES
+// LIENS DES BOUTIQUES
 // ========================================
 
 const SHOP_LINKS = {
@@ -721,11 +722,6 @@ const SHOP_LINKS = {
   'About You': 'https://www.aboutyou.fr',
   'Jaded London': 'https://jadedldn.com',
   'Four Amsterdam': 'https://www.fouramsterdam.com/',
-  'Lounge': 'https://fr.lounge.com/',
-  'Mia Burton': 'https://miaburton.com/',
-  'Scuffers': 'https://scuffers.com/',
-  'Cavallaro Napoli': 'https://www.cavallaronapoli.com/',
-  '4Elementos': 'https://4elementos.fr/',
   'Arte Antwerp': 'https://arte-antwerp.com',
   'Daily Paper': 'https://dailypaperclothing.com',
   'Axel Arigato': 'https://axelarigato.com',
@@ -735,24 +731,27 @@ const SHOP_LINKS = {
   'Izac': 'https://www.izac.fr',
   'Kipling': 'https://www.kipling.com',
   'Loavies': 'https://www.loavies.com',
+  'Lounge': 'https://fr.lounge.com/',
   'Lyle & Scott': 'https://www.lyleandscott.com',
   'Boozt': 'https://www.boozt.com',
   'Glamood': 'https://www.glamood.com',
   'Ray-Ban': 'https://www.ray-ban.com',
   'Sunglass Hut': 'https://www.sunglasshut.com',
   'Oakley': 'https://www.oakley.com',
+  'Mia Burton': 'https://miaburton.com/',
   'Samsonite': 'https://www.samsonite.fr',
   'Lipault': 'https://www.lipault.fr',
   'American Tourister': 'https://www.americantourister.fr',
   'Eastpak': 'https://www.eastpak.com',
   'Reima': 'https://www.reima.com',
+  'Scuffers': 'https://scuffers.com/',
+  'Cavallaro Napoli': 'https://www.cavallaronapoli.com/',
   'J Crew': 'https://www.jcrew.com',
   "Arc'Teryx": 'https://arcteryx.com',
   'GOAT': 'https://www.goat.com',
   'StockX': 'https://stockx.com',
+  '4Elementos': 'https://4elementos.fr/',
   'Zadig & Voltaire': 'https://zadig-et-voltaire.com',
-
-  // NOUVEAU MODE
   'La Redoute': 'https://www.laredoute.fr/',
 
   // HIGH-TECH
@@ -762,8 +761,6 @@ const SHOP_LINKS = {
   'PlayStation': 'https://www.playstation.com/fr-fr/',
   'Back Market': 'https://www.backmarket.fr',
   'JoyBuy': 'https://www.joybuy.fr/',
-  'Eardopes': 'https://eardopes.fr/',
-  'MovaTech': 'https://fr.mova.tech/',
   'Asus': 'https://www.asus.com/fr/',
   'Lenovo': 'https://www.lenovo.com/fr/fr/',
   'Logitech': 'https://www.logitech.com/fr-fr',
@@ -789,9 +786,9 @@ const SHOP_LINKS = {
   'Wooting': 'https://wooting.io',
   'Meta': 'https://www.meta.com',
   'Even Realities': 'https://www.evenrealities.com',
+  'Eardopes': 'https://eardopes.fr/',
   'Mous': 'https://www.mous.co',
-
-  // NOUVEAUX HIGH-TECH
+  'MovaTech': 'https://fr.mova.tech/',
   'Garmin': 'https://www.garmin.com/fr-FR/',
   'SteamOne': 'https://steam-one.com/',
 
@@ -835,10 +832,8 @@ const SHOP_LINKS = {
   'Kilian Paris': 'https://www.bykilian.com',
   'Jo Malone': 'https://www.jomalone.fr',
   'Chogan': 'https://www.chogangroupspa.com',
-  'Manscaped': 'https://www.manscaped.com',
   'Fragrance': 'https://fragrance-and-co.com/',
-
-  // NOUVEAU BEAUTÉ
+  'Manscaped': 'https://www.manscaped.com',
   'Flaconi': 'https://www.flaconi.fr/',
 
   // SPORT
@@ -863,8 +858,6 @@ const SHOP_LINKS = {
   'SnowLeader': 'https://www.snowleader.com',
   'DopeSnow': 'https://www.dopesnow.com',
   'Nocta': 'https://www.nocta.com',
-
-  // NOUVEAUX SPORT
   'Decathlon': 'https://www.decathlon.fr/',
   'Alpiniste': 'https://www.alpiniste.fr/',
 
@@ -885,8 +878,6 @@ const SHOP_LINKS = {
   'Home24': 'https://www.home24.fr',
   'Zooplus': 'https://www.zooplus.fr',
   'Maxi Zoo': 'https://www.maxizoo.fr',
-
-  // NOUVEAUX MAISON
   'Onyx Cookware': 'https://onyxcookware.fr/',
   'ManoMano': 'https://www.manomano.fr/',
   'Nespresso': 'https://www.nespresso.com/fr/fr/',
@@ -900,20 +891,32 @@ const SHOP_LINKS = {
   'Thomann': 'https://www.thomann.de/fr/',
   'Bax Music': 'https://www.bax-shop.fr',
   'Ekster': 'https://www.ekster.com',
+  'Aniioki': 'https://aniioki.com/',
   'Le Petit Vapoteur': 'https://www.lepetitvapoteur.com',
   'Air Up': 'https://shop.air-up.com/fr/fr',
-  'Aniioki': 'https://aniioki.com/',
-
-  // NOUVEAU DIVERS
   'AliExpress': 'https://fr.aliexpress.com/'
 };
 
 // ========================================
-// DESIGN DU CATALOGUE
+// CATALOGUE PREMIUM - COMPONENTS V2
 // ========================================
+
+// Les Components V2 permettent :
+// - de vrais conteneurs bleus
+// - des séparateurs natifs
+// - des titres hiérarchisés
+// - des boutons de navigation
+// - des boutiques cliquables
 
 function ticket() {
   return `<#${TICKET_CHANNEL_ID}>`;
+}
+
+function ticketUrl() {
+  return (
+    `https://discord.com/channels/` +
+    `${GUILD_ID}/${TICKET_CHANNEL_ID}`
+  );
 }
 
 function shopLine(name) {
@@ -931,98 +934,286 @@ function shopLine(name) {
   return `• **${label}**`;
 }
 
-function blueEmbed(description) {
-  return new EmbedBuilder()
-    .setColor(0x587dff)
-    .setDescription(description);
+function premiumContainer() {
+  return new ContainerBuilder()
+    .setAccentColor(PREMIUM_BLUE);
 }
 
-function catalogEmbeds() {
-  const result = [];
+function addText(container, text) {
+  container.addTextDisplayComponents(
+    new TextDisplayBuilder().setContent(text)
+  );
 
-  // INTRODUCTION
-  result.push(
-    blueEmbed([
-      '## 📚 Catalogue des boutiques',
+  return container;
+}
+
+function addSeparator(container) {
+  container.addSeparatorComponents(
+    new SeparatorBuilder()
+      .setDivider(true)
+      .setSpacing(SeparatorSpacingSize.Small)
+  );
+
+  return container;
+}
+
+function ticketButton() {
+  return new ButtonBuilder()
+    .setLabel('Ouvrir un ticket')
+    .setEmoji('🎫')
+    .setStyle(ButtonStyle.Link)
+    .setURL(ticketUrl());
+}
+
+function catalogButton() {
+  return new ButtonBuilder()
+    .setLabel('Voir le catalogue')
+    .setEmoji('📚')
+    .setStyle(ButtonStyle.Link)
+    .setURL(
+      `https://discord.com/channels/` +
+      `${GUILD_ID}/${CATALOG_CHANNEL_ID}`
+    );
+}
+
+function serverButton() {
+  return new ButtonBuilder()
+    .setLabel('Partager le serveur')
+    .setEmoji('💙')
+    .setStyle(ButtonStyle.Link)
+    .setURL(SERVER_INVITE);
+}
+
+// ========================================
+// INTRODUCTION PREMIUM
+// ========================================
+
+function premiumIntro() {
+  const c = premiumContainer();
+
+  addText(
+    c,
+    [
+      '## 💎 ZERX MARKET',
+      '### CATALOGUE OFFICIEL',
       '',
-      '━━━━━━━━━━━━',
+      '*Votre sélection de boutiques, réunie au même endroit.*'
+    ].join('\n')
+  );
+
+  addSeparator(c);
+
+  addText(
+    c,
+    [
+      'Bienvenue dans le catalogue **Zerx Market**.',
       '',
-      'Retrouvez toutes les boutiques actuellement disponibles.',
+      'Découvrez les boutiques disponibles à travers nos **8 catégories**.',
+      '',
+      '✦ **199 entrées** dans le catalogue',
+      '✦ **8 univers** à découvrir',
+      '✦ **Liens directs** vers les boutiques'
+    ].join('\n')
+  );
+
+  addSeparator(c);
+
+  addText(
+    c,
+    [
+      '### ✧ Avant de commander',
       '',
       '⏳ Les délais et les montants maximums varient selon la boutique.',
       '',
-      `📩 Ouvrez un ${ticket()} avant toute commande pour obtenir toutes les informations.`
-    ].join('\n'))
+      `🎫 Pour obtenir les informations, rendez-vous dans ${ticket()}.`
+    ].join('\n')
   );
 
-  const reminder = [
-    '━━━━━━━━━━━━━━━━━━━',
-    '',
-    '💬 **Besoin d’informations ou vous ne trouvez pas une boutique ?**',
-    '',
-    `📩 Ouvrez un ${ticket()} pour connaître les délais, les limites, la disponibilité ou vérifier si une boutique peut être proposée.`
-  ].join('\n');
+  c.addActionRowComponents(
+    new ActionRowBuilder().addComponents(
+      ticketButton()
+    )
+  );
 
-  // CATÉGORIES
-  for (const section of CATALOG) {
-    const lines = section.shops.map(shopLine);
+  return c;
+}
 
-    const chunks = [];
-    let chunk = '';
+// ========================================
+// CATÉGORIES PREMIUM
+// ========================================
 
-    for (const line of lines) {
-      const candidate = chunk
-        ? chunk + '\n\n' + line
-        : line;
+function splitShops(section) {
+  // Un TextDisplay Discord est limité à
+  // 4000 caractères.
+  // On garde une marge pour la mise en forme.
 
-      if (candidate.length > 3200 && chunk) {
-        chunks.push(chunk);
-        chunk = line;
-      } else {
-        chunk = candidate;
-      }
+  const chunks = [];
+  let current = '';
+
+  for (const name of section.shops) {
+    const line = shopLine(name);
+
+    const candidate = current
+      ? `${current}\n${line}`
+      : line;
+
+    if (candidate.length > 2500 && current) {
+      chunks.push(current);
+      current = line;
+    } else {
+      current = candidate;
     }
-
-    if (chunk) {
-      chunks.push(chunk);
-    }
-
-    chunks.forEach((part, index) => {
-      const title = index === 0
-        ? `## ${section.title}`
-        : `## ${section.title} (suite)`;
-
-      const footer =
-        index === chunks.length - 1
-          ? '\n\n' + reminder
-          : '';
-
-      result.push(
-        blueEmbed(
-          `${title}\n\n━━━━━━━━━━━━\n\n${part}${footer}`
-        )
-      );
-    });
   }
 
-  // CONCLUSION
-  result.push(
-    blueEmbed([
-      '⬆️ **Pensez à remonter vers le haut du salon** afin de voir l’ensemble du catalogue disponible.',
-      '',
-      '━━━━━━━━━━━━',
-      '',
-      '💬 **Vous ne trouvez pas une boutique ou vous souhaitez obtenir plus d’informations ?**',
-      '',
-      `📩 Ouvrez un ticket juste ici : ${ticket()}`,
-      '',
-      'ℹ️ **À noter :** Cette liste n’inclut pas toutes les boutiques qu’il est possible de RF. Si vous avez une boutique en tête, envoyez-nous le site via un ticket et notre équipe vérifiera si celle-ci est réalisable ou non.',
-      '',
-      '❤️ **Merci pour votre confiance !**'
-    ].join('\n'))
+  if (current) {
+    chunks.push(current);
+  }
+
+  return chunks;
+}
+
+function premiumCategory(section, index) {
+  const c = premiumContainer();
+
+  const number = String(index + 1).padStart(2, '0');
+
+  addText(
+    c,
+    [
+      `### ${number}  |  ${section.title}`,
+      `*${section.subtitle}*`
+    ].join('\n')
   );
 
-  return result;
+  addSeparator(c);
+
+  const chunks = splitShops(section);
+
+  chunks.forEach((chunk, chunkIndex) => {
+    if (chunkIndex > 0) {
+      addSeparator(c);
+    }
+
+    addText(c, chunk);
+  });
+
+  addSeparator(c);
+
+  addText(
+    c,
+    [
+      `✦ **${section.shops.length} boutiques**`,
+      '',
+      '💬 *Une question ou une boutique introuvable ?*',
+      `Consultez ${ticket()} pour les délais, limites et disponibilités.`
+    ].join('\n')
+  );
+
+  c.addActionRowComponents(
+    new ActionRowBuilder().addComponents(
+      ticketButton()
+    )
+  );
+
+  return c;
+}
+
+// ========================================
+// CONCLUSION PREMIUM
+// ========================================
+
+function premiumOutro() {
+  const c = premiumContainer();
+
+  addText(
+    c,
+    [
+      '## 💙 ZERX MARKET',
+      '### VOTRE EXPÉRIENCE, NOTRE PRIORITÉ'
+    ].join('\n')
+  );
+
+  addSeparator(c);
+
+  addText(
+    c,
+    [
+      '⬆️ **Remontez dans le salon** pour parcourir toutes les catégories du catalogue.',
+      '',
+      '### ✧ Besoin d’aide ?',
+      '',
+      'Vous ne trouvez pas votre boutique ?',
+      'Vous souhaitez connaître un délai, une limite ou une disponibilité ?',
+      '',
+      `🎫 Notre équipe vous répond dans ${ticket()}.`
+    ].join('\n')
+  );
+
+  addSeparator(c);
+
+  addText(
+    c,
+    [
+      '### ✧ Une boutique manque à la liste ?',
+      '',
+      'Ce catalogue ne comprend pas nécessairement toutes les boutiques pouvant être proposées en RF.',
+      '',
+      'Envoyez-nous le lien du site via un ticket : notre équipe vérifiera si votre demande est réalisable.'
+    ].join('\n')
+  );
+
+  addSeparator(c);
+
+  addText(
+    c,
+    [
+      '**❤️ Merci pour votre confiance !**',
+      '',
+      '*Zerx Market — Catalogue officiel*'
+    ].join('\n')
+  );
+
+  c.addActionRowComponents(
+    new ActionRowBuilder().addComponents(
+      ticketButton(),
+      catalogButton(),
+      serverButton()
+    )
+  );
+
+  return c;
+}
+
+// ========================================
+// CONSTRUCTION DES MESSAGES PREMIUM
+// ========================================
+
+function catalogMessages() {
+  const messages = [];
+
+  messages.push({
+    flags: MessageFlags.IsComponentsV2,
+    components: [premiumIntro()],
+    allowedMentions: { parse: [] }
+  });
+
+  CATALOG.forEach((section, index) => {
+    messages.push({
+      flags: MessageFlags.IsComponentsV2,
+      components: [
+        premiumCategory(section, index)
+      ],
+      allowedMentions: { parse: [] }
+    });
+  });
+
+  messages.push({
+    flags: MessageFlags.IsComponentsV2,
+    components: [premiumOutro()],
+    allowedMentions: { parse: [] }
+  });
+
+  return messages;
 }
 
 // ========================================
@@ -1050,7 +1241,7 @@ function catalogControls(channelId = null) {
     buttons(
       [
         'zm:catalog:send',
-        'Publier le catalogue',
+        'Publier le catalogue Premium',
         ButtonStyle.Success
       ],
       [
@@ -1063,7 +1254,7 @@ function catalogControls(channelId = null) {
 }
 
 // ========================================
-// VÉRIFICATION DES PERMISSIONS
+// PERMISSIONS
 // ========================================
 
 async function allowedChannel(interaction, channelId) {
@@ -1120,6 +1311,17 @@ client.once(Events.ClientReady, async () => {
     console.log(
       '✅ Commandes /vouch et /message enregistrées.'
     );
+
+    const count = CATALOG.reduce(
+      (total, section) =>
+        total + section.shops.length,
+      0
+    );
+
+    console.log(
+      `💎 Catalogue Premium chargé : ${count} entrées.`
+    );
+
   } catch (error) {
     console.error(
       '❌ Erreur enregistrement commandes :',
@@ -1185,9 +1387,11 @@ client.on(Events.InteractionCreate, async i => {
 
       return i.reply({
         content:
-          `📚 **Catalogue prêt !**\n\n` +
-          `${CATALOG.length} catégories et ${total} entrées.\n\n` +
-          'Choisis le salon puis confirme la publication.',
+          '💎 **ZERX MARKET — CATALOGUE PREMIUM**\n\n' +
+          `📚 ${CATALOG.length} catégories\n` +
+          `🛍️ ${total} boutiques\n` +
+          '🎨 Design bleu nuit Premium\n\n' +
+          'Choisis le salon dans lequel publier le catalogue.',
 
         components: catalogControls(),
 
@@ -1244,7 +1448,9 @@ client.on(Events.InteractionCreate, async i => {
 
         return i.update({
           content:
-            `📚 Le catalogue sera publié dans <#${channel.id}>.`,
+            '💎 **Catalogue Premium prêt !**\n\n' +
+            `📢 Salon : <#${channel.id}>\n\n` +
+            'Clique sur **Publier le catalogue Premium** pour confirmer.',
 
           components: catalogControls(channel.id)
         });
@@ -1267,7 +1473,7 @@ client.on(Events.InteractionCreate, async i => {
         });
       }
 
-      // PUBLIER LE CATALOGUE
+      // PUBLIER
       if (i.customId === 'zm:catalog:send') {
         if (s.sending || s.step !== 'choose') {
           return i.reply({
@@ -1290,7 +1496,7 @@ client.on(Events.InteractionCreate, async i => {
 
         await i.update({
           content:
-            '⏳ Publication du catalogue en cours…',
+            '⏳ Publication du catalogue Premium en cours…',
           components: []
         });
 
@@ -1306,12 +1512,9 @@ client.on(Events.InteractionCreate, async i => {
             throw new Error('Salon inaccessible');
           }
 
-          for (const embed of catalogEmbeds()) {
-            await channel.send({
-              embeds: [embed],
-              allowedMentions: { parse: [] }
-            });
-
+          // INTRO + 8 CATÉGORIES + CONCLUSION
+          for (const payload of catalogMessages()) {
+            await channel.send(payload);
             count++;
           }
 
@@ -1319,9 +1522,10 @@ client.on(Events.InteractionCreate, async i => {
 
           return i.editReply({
             content:
-              `✅ **Catalogue publié !**\n\n` +
+              '💎 **CATALOGUE PREMIUM PUBLIÉ !**\n\n' +
               `📢 Salon : <#${channel.id}>\n` +
-              `📨 ${count} messages envoyés.`,
+              `📨 ${count} messages envoyés.\n` +
+              '🎨 Design bleu nuit activé.',
 
             components: []
           });
@@ -1801,7 +2005,6 @@ client.on(Events.InteractionCreate, async i => {
         });
       }
 
-      // ANTI-DOUBLE CLIC
       s.publishing = true;
       s.step = 'publishing';
       touch(s);
