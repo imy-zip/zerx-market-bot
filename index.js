@@ -44,11 +44,14 @@ const CATALOG_CHANNEL_ID = '1195054550588076176';
 
 const SERVER_INVITE = 'https://discord.gg/zYCc9fDZ3C';
 
-// Bleu foncé discret et professionnel
 const EMBED_COLOR = 0x364B70;
 
 const SESSION_TIMEOUT = 15 * 60 * 1000;
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+
+// Nombre de boutiques par embed.
+// Cela permet d'avoir des tailles plus proches.
+const SHOPS_PER_EMBED = 12;
 
 const sessions = new Map();
 const catalogSessions = new Map();
@@ -937,54 +940,72 @@ function catalogIntro() {
 }
 
 // ========================================
+// MESSAGE DE FIN DE CHAQUE CATÉGORIE
+// ========================================
+
+function categoryFooter() {
+  return [
+    '━━━━━━━━━━━━',
+    '',
+    '💬 **Besoin d’informations ou vous ne trouvez pas une boutique ?**',
+    '',
+    `📩 Ouvrez un ${ticket()} pour connaître les délais, les limites, la disponibilité ou vérifier si une boutique peut être proposée.`
+  ].join('\n');
+}
+
+// ========================================
 // EMBEDS DES CATÉGORIES
 // ========================================
 
-// Discord limite une description d'embed
-// à 4096 caractères.
+// 12 boutiques maximum par embed.
+// Même présentation et même pied de page.
 //
-// On répartit automatiquement les longues
-// catégories sur plusieurs embeds.
+// Les liens restent en gras et cliquables.
+// Une ligne vide sépare chaque boutique.
 //
-// Chaque boutique reste en gras, cliquable,
-// avec une ligne vide entre les noms.
+// Les catégories longues sont réparties
+// automatiquement sur plusieurs embeds.
 
 function categoryEmbeds(section) {
   const embeds = [];
+
   const chunks = [];
 
-  let current = '';
-
-  for (const name of section.shops) {
-    const line = shopLine(name);
-
-    const candidate = current
-      ? `${current}\n\n${line}`
-      : line;
-
-    if (candidate.length > 3500 && current) {
-      chunks.push(current);
-      current = line;
-    } else {
-      current = candidate;
-    }
+  for (
+    let index = 0;
+    index < section.shops.length;
+    index += SHOPS_PER_EMBED
+  ) {
+    chunks.push(
+      section.shops.slice(
+        index,
+        index + SHOPS_PER_EMBED
+      )
+    );
   }
 
-  if (current) {
-    chunks.push(current);
-  }
-
-  chunks.forEach((chunk, index) => {
+  chunks.forEach((shops, index) => {
     const title = index === 0
       ? section.title
       : `${section.title} — Suite`;
 
+    const shopText = shops
+      .map(shopLine)
+      .join('\n\n');
+
+    const description = [
+      '━━━━━━━━━━━━',
+      '',
+      shopText,
+      '',
+      '',
+      categoryFooter()
+    ].join('\n');
+
     embeds.push(
       baseEmbed()
         .setTitle(title)
-        .setDescription(
-          `━━━━━━━━━━━━\n\n${chunk}`
-        )
+        .setDescription(description)
     );
   });
 
