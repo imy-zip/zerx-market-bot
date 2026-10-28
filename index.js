@@ -28,19 +28,18 @@ const {
 } = require('discord.js');
 
 // ========================================
-// CONFIGURATION
+// CONFIGURATION ZERX MARKET
 // ========================================
 
 const TOKEN = process.env.DISCORD_TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
+
 const GUILD_ID =
   process.env.GUILD_ID || '1195047756910309456';
 
 const OWNER_ID = '1195042683064942624';
 
-// Facultatif : ID du salon Ticket
-const TICKET_CHANNEL_ID =
-  process.env.TICKET_CHANNEL_ID || '';
+const TICKET_CHANNEL_ID = '1195054777025958008';
 
 const SESSION_TIMEOUT = 15 * 60 * 1000;
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
@@ -64,7 +63,7 @@ const client = new Client({
 });
 
 // ========================================
-// FONCTIONS UTILES
+// OUTILS
 // ========================================
 
 function getSession() {
@@ -162,7 +161,7 @@ function extOf(attachment) {
 }
 
 // ========================================
-// PHOTOS PRÉPARÉES À L'AVANCE
+// PRÉPARATION DES PHOTOS
 // ========================================
 
 async function prepPhoto(attachment) {
@@ -409,7 +408,7 @@ function field(
 }
 
 // ========================================
-// COMMANDES DISCORD
+// COMMANDES
 // ========================================
 
 const commands = [
@@ -668,16 +667,11 @@ const CATALOG = [
 ];
 
 // ========================================
-// LIENS DES BOUTIQUES
+// TOUS LES LIENS DES BOUTIQUES
 // ========================================
 
-// Pour modifier un lien, change simplement
-// l'adresse à droite du nom.
-//
-// Les boutiques sans lien renseigné restent
-// en gras, mais non cliquables.
-
 const SHOP_LINKS = {
+  // MODE
   'Adidas': 'https://www.adidas.fr',
   'COS': 'https://www.cos.com',
   'Mango': 'https://shop.mango.com',
@@ -707,6 +701,15 @@ const SHOP_LINKS = {
   'AllSaints': 'https://www.allsaints.com',
   'About You': 'https://www.aboutyou.fr',
   'Jaded London': 'https://jadedldn.com',
+
+  // NOUVEAUX LIENS MODE
+  'Four Amsterdam': 'https://www.fouramsterdam.com/',
+  'Lounge': 'https://fr.lounge.com/',
+  'Mia Burton': 'https://miaburton.com/',
+  'Scuffers': 'https://scuffers.com/',
+  'Cavallaro Napoli': 'https://www.cavallaronapoli.com/',
+  '4Elementos': 'https://4elementos.fr/',
+
   'Arte Antwerp': 'https://arte-antwerp.com',
   'Daily Paper': 'https://dailypaperclothing.com',
   'Axel Arigato': 'https://axelarigato.com',
@@ -733,11 +736,18 @@ const SHOP_LINKS = {
   'StockX': 'https://stockx.com',
   'Zadig & Voltaire': 'https://zadig-et-voltaire.com',
 
+  // HIGH-TECH
   'Amazon': 'https://www.amazon.fr',
   'Apple': 'https://www.apple.com/fr/',
   'MemoryPC': 'https://www.memorypc.fr',
   'PlayStation': 'https://www.playstation.com/fr-fr/',
   'Back Market': 'https://www.backmarket.fr',
+
+  // NOUVEAUX LIENS HIGH-TECH
+  'JoyBuy': 'https://www.joybuy.fr/',
+  'Eardopes': 'https://eardopes.fr/',
+  'MovaTech': 'https://fr.mova.tech/',
+
   'Asus': 'https://www.asus.com/fr/',
   'Lenovo': 'https://www.lenovo.com/fr/fr/',
   'Logitech': 'https://www.logitech.com/fr-fr',
@@ -765,6 +775,7 @@ const SHOP_LINKS = {
   'Even Realities': 'https://www.evenrealities.com',
   'Mous': 'https://www.mous.co',
 
+  // LUXE
   'Tiffany & Co.': 'https://www.tiffany.fr',
   'Prada': 'https://www.prada.com',
   'Coach': 'https://fr.coach.com',
@@ -792,6 +803,7 @@ const SHOP_LINKS = {
   'Canada Goose': 'https://www.canadagoose.com',
   'Net-a-Porter': 'https://www.net-a-porter.com',
 
+  // BEAUTÉ
   'Sephora': 'https://www.sephora.fr',
   'Nocibé': 'https://www.nocibe.fr',
   'Rituals': 'https://www.rituals.com',
@@ -805,12 +817,20 @@ const SHOP_LINKS = {
   'Chogan': 'https://www.chogangroupspa.com',
   'Manscaped': 'https://www.manscaped.com',
 
+  // NOUVEAU LIEN BEAUTÉ
+  'Fragrance': 'https://fragrance-and-co.com/',
+
+  // SPORT
   'Lululemon': 'https://www.lululemon.com',
   'Alo Yoga': 'https://www.aloyoga.com',
   'On Running': 'https://www.on.com',
   'Teveo': 'https://teveo.com',
   'Gymshark': 'https://fr.gymshark.com',
   'NutriMuscle': 'https://www.nutrimuscle.com',
+
+  // NOUVEAU LIEN SPORT
+  'Esprit Padel Shop': 'https://esprit-padel-shop.com/',
+
   'Nike': 'https://www.nike.com/fr',
   'Puma': 'https://eu.puma.com/fr/fr',
   'New Balance': 'https://www.newbalance.fr',
@@ -826,6 +846,7 @@ const SHOP_LINKS = {
   'DopeSnow': 'https://www.dopesnow.com',
   'Nocta': 'https://www.nocta.com',
 
+  // BIJOUX
   '58 Facettes': 'https://58facettes.fr',
   'Pandora': 'https://fr.pandora.net',
   'Swarovski': 'https://www.swarovski.com',
@@ -836,12 +857,14 @@ const SHOP_LINKS = {
   'Isabel Bernard': 'https://www.isabelbernard.com',
   'G-Shock': 'https://gshock.casio.com',
 
+  // MAISON
   'Wine in Black': 'https://www.wine-in-black.fr',
   'Boutique Stanley': 'https://eu.stanley1913.com',
   'Home24': 'https://www.home24.fr',
   'Zooplus': 'https://www.zooplus.fr',
   'Maxi Zoo': 'https://www.maxizoo.fr',
 
+  // DIVERS
   'PayPal': 'https://www.paypal.com/fr/home',
   'LEGO': 'https://www.lego.com/fr-fr',
   'Funko': 'https://funko.com',
@@ -851,7 +874,10 @@ const SHOP_LINKS = {
   'Bax Music': 'https://www.bax-shop.fr',
   'Ekster': 'https://www.ekster.com',
   'Le Petit Vapoteur': 'https://www.lepetitvapoteur.com',
-  'Air Up': 'https://shop.air-up.com/fr/fr'
+  'Air Up': 'https://shop.air-up.com/fr/fr',
+
+  // NOUVEAU LIEN DIVERS
+  'Aniioki': 'https://aniioki.com/'
 };
 
 // ========================================
@@ -859,9 +885,7 @@ const SHOP_LINKS = {
 // ========================================
 
 function ticket() {
-  return TICKET_CHANNEL_ID
-    ? `<#${TICKET_CHANNEL_ID}>`
-    : '🔖┃𝗧𝗶𝗰𝗸𝗲𝘁';
+  return `<#${TICKET_CHANNEL_ID}>`;
 }
 
 function shopLine(name) {
@@ -888,7 +912,7 @@ function blueEmbed(description) {
 function catalogEmbeds() {
   const result = [];
 
-  // PREMIER EMBED : INTRODUCTION
+  // INTRODUCTION
   result.push(
     blueEmbed([
       '## 📚 Catalogue des boutiques',
@@ -911,9 +935,7 @@ function catalogEmbeds() {
     `📩 Ouvrez un ${ticket()} pour connaître les délais, les limites, la disponibilité ou vérifier si une boutique peut être proposée.`
   ].join('\n');
 
-  // UN OU PLUSIEURS EMBEDS PAR CATÉGORIE
-  // Discord limite la description à 4096 caractères.
-
+  // CATÉGORIES
   for (const section of CATALOG) {
     const lines = section.shops.map(shopLine);
 
@@ -955,7 +977,7 @@ function catalogEmbeds() {
     });
   }
 
-  // DERNIER EMBED : CONCLUSION
+  // CONCLUSION
   result.push(
     blueEmbed([
       '⬆️ **Pensez à remonter vers le haut du salon** afin de voir l’ensemble du catalogue disponible.',
@@ -1013,7 +1035,7 @@ function catalogControls(channelId = null) {
 }
 
 // ========================================
-// VÉRIFIER LES PERMISSIONS DU SALON
+// VÉRIFICATION DES PERMISSIONS
 // ========================================
 
 async function allowedChannel(interaction, channelId) {
@@ -1044,7 +1066,7 @@ async function allowedChannel(interaction, channelId) {
 }
 
 // ========================================
-// DÉMARRAGE DU BOT
+// DÉMARRAGE
 // ========================================
 
 client.once(Events.ClientReady, async () => {
@@ -1079,7 +1101,7 @@ client.once(Events.ClientReady, async () => {
 });
 
 // ========================================
-// GESTION DES INTERACTIONS
+// INTERACTIONS
 // ========================================
 
 client.on(Events.InteractionCreate, async i => {
@@ -1093,7 +1115,7 @@ client.on(Events.InteractionCreate, async i => {
   }
 
   try {
-    // SÉCURITÉ : PROPRIÉTAIRE UNIQUEMENT
+    // PROPRIÉTAIRE UNIQUEMENT
     if (i.user.id !== OWNER_ID) {
       return i.reply({
         content: '⛔ Tu ne peux pas utiliser ce bot.',
@@ -1146,7 +1168,7 @@ client.on(Events.InteractionCreate, async i => {
     }
 
     // ====================================
-    // BOUTONS /MESSAGE
+    // INTERACTIONS /MESSAGE
     // ====================================
 
     if (
@@ -1256,8 +1278,6 @@ client.on(Events.InteractionCreate, async i => {
             throw new Error('Salon inaccessible');
           }
 
-          // Envoi dans l'ordre :
-          // intro, catégories, conclusion
           for (const embed of catalogEmbeds()) {
             await channel.send({
               embeds: [embed],
@@ -1753,7 +1773,7 @@ client.on(Events.InteractionCreate, async i => {
         });
       }
 
-      // Verrou anti-double clic
+      // ANTI-DOUBLE CLIC
       s.publishing = true;
       s.step = 'publishing';
       touch(s);
@@ -1927,8 +1947,6 @@ client.on(Events.MessageCreate, async message => {
       });
 
     } else {
-      // UE : preview après une photo
-      // RF : preview après la deuxième photo
       await showPreview(message.channel, s);
     }
 
@@ -1955,7 +1973,7 @@ client.on(Events.MessageCreate, async message => {
 });
 
 // ========================================
-// CONNEXION DISCORD
+// CONNEXION
 // ========================================
 
 client.login(TOKEN);
