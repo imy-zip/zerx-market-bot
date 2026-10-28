@@ -33,34 +33,24 @@ const {
 
 const TOKEN = process.env.DISCORD_TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
-
-const GUILD_ID =
-  process.env.GUILD_ID || '1195047756910309456';
+const GUILD_ID = process.env.GUILD_ID || '1195047756910309456';
 
 const OWNER_ID = '1195042683064942624';
-
 const TICKET_CHANNEL_ID = '1195054777025958008';
 const CATALOG_CHANNEL_ID = '1195054550588076176';
 
 const SERVER_INVITE = 'https://discord.gg/zYCc9fDZ3C';
 
 const EMBED_COLOR = 0x364B70;
-
 const SESSION_TIMEOUT = 15 * 60 * 1000;
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
-
-// Nombre de boutiques par embed.
-// Cela permet d'avoir des tailles plus proches.
-const SHOPS_PER_EMBED = 12;
 
 const sessions = new Map();
 const catalogSessions = new Map();
 const completedPreviews = new Set();
 
 if (!TOKEN || !CLIENT_ID) {
-  throw new Error(
-    'DISCORD_TOKEN et CLIENT_ID sont obligatoires.'
-  );
+  throw new Error('DISCORD_TOKEN et CLIENT_ID sont obligatoires.');
 }
 
 const client = new Client({
@@ -122,9 +112,7 @@ function money(value) {
     .replace(/\n/g, ' ')
     .trim();
 
-  return amount.includes('€')
-    ? amount
-    : amount + '€';
+  return amount.includes('€') ? amount : amount + '€';
 }
 
 function normalizeUrl(value) {
@@ -184,9 +172,7 @@ async function prepPhoto(attachment) {
     throw new Error('Téléchargement impossible');
   }
 
-  const buffer = Buffer.from(
-    await response.arrayBuffer()
-  );
+  const buffer = Buffer.from(await response.arrayBuffer());
 
   if (buffer.length > MAX_IMAGE_BYTES) {
     throw new Error('IMAGE_TOO_LARGE');
@@ -204,8 +190,7 @@ function prepared(s) {
   const urls = [];
 
   s.photos.forEach((photo, index) => {
-    const name =
-      `zerx-market-${index + 1}.${photo.ext}`;
+    const name = `zerx-market-${index + 1}.${photo.ext}`;
 
     files.push(
       new AttachmentBuilder(photo.buffer, { name })
@@ -425,153 +410,62 @@ const commands = [
 
   new SlashCommandBuilder()
     .setName('message')
-    .setDescription(
-      'Publier le catalogue Zerx Market'
-    )
+    .setDescription('Publier le catalogue Zerx Market')
 ];
 
 // ========================================
-// CATALOGUE COMPLET
+// CATALOGUE COMPLET : 8 CATÉGORIES
 // ========================================
 
 const CATALOG = [
   {
     title: '👕 Mode',
     shops: [
-      'Adidas',
-      'COS',
-      'Mango',
-      'Ralph Lauren',
-      'Zara',
-      'H&M',
-      'Shein',
-      'Zalando',
-      'ASOS',
-      'Farfetch',
-      'Lacoste',
-      'Calvin Klein',
-      "Levi's",
-      'Carhartt',
-      'Timberland',
-      'Foot Locker',
-      'Hollister',
-      'Abercrombie',
-      'Bershka',
-      'Pull&Bear',
-      'Boohoo',
-      'PrettyLittleThing',
-      "Victoria's Secret",
-      'Dr. Martens',
-      'Michael Kors',
-      'The Kooples',
-      'AllSaints',
-      'About You',
-      'Jaded London',
-      'Four Amsterdam',
-      'Arte Antwerp',
-      'Daily Paper',
-      'Axel Arigato',
-      'Gerard Darel',
-      'Eden Park',
-      'Celio',
-      'Izac',
-      'Kipling',
-      'Loavies',
-      'Lounge',
-      'Lyle & Scott',
-      'Boozt',
-      'Glamood',
-      'Ray-Ban',
-      'Sunglass Hut',
-      'Oakley',
-      'Mia Burton',
-      'Samsonite',
-      'Lipault',
-      'American Tourister',
-      'Eastpak',
-      'Reima',
-      'Scuffers',
-      'Cavallaro Napoli',
-      'J Crew',
-      "Arc'Teryx",
-      'GOAT',
-      'StockX',
-      '4Elementos',
-      'Zadig & Voltaire',
-      'La Redoute'
+      'Adidas', 'COS', 'Mango', 'Ralph Lauren',
+      'Zara', 'H&M', 'Shein', 'Zalando',
+      'ASOS', 'Farfetch', 'Lacoste', 'Calvin Klein',
+      "Levi's", 'Carhartt', 'Timberland', 'Foot Locker',
+      'Hollister', 'Abercrombie', 'Bershka', 'Pull&Bear',
+      'Boohoo', 'PrettyLittleThing', "Victoria's Secret",
+      'Dr. Martens', 'Michael Kors', 'The Kooples',
+      'AllSaints', 'About You', 'Jaded London',
+      'Four Amsterdam', 'Arte Antwerp', 'Daily Paper',
+      'Axel Arigato', 'Gerard Darel', 'Eden Park',
+      'Celio', 'Izac', 'Kipling', 'Loavies',
+      'Lounge', 'Lyle & Scott', 'Boozt', 'Glamood',
+      'Ray-Ban', 'Sunglass Hut', 'Oakley', 'Mia Burton',
+      'Samsonite', 'Lipault', 'American Tourister',
+      'Eastpak', 'Reima', 'Scuffers', 'Cavallaro Napoli',
+      'J Crew', "Arc'Teryx", 'GOAT', 'StockX',
+      '4Elementos', 'Zadig & Voltaire', 'La Redoute'
     ]
   },
 
   {
     title: '💻 High-Tech & Gaming',
     shops: [
-      'Amazon',
-      'Apple',
-      'MemoryPC',
-      'PlayStation',
-      'Back Market',
-      'JoyBuy',
-      'Asus',
-      'Lenovo',
-      'Logitech',
-      'Dyson',
-      'JBL',
-      'Bose',
-      'Kef',
-      'Bowers & Wilkins',
-      'Canon',
-      'Ring',
-      'Eufy',
-      'Arlo',
-      'Epson',
-      'KitchenAid',
-      'Moulinex',
-      'Ninja Kitchen',
-      'Shark Ninja',
-      'Tineco',
-      'Bissell',
-      'Bambu Lab',
-      'Oral-B',
-      'Oura Ring',
-      'Wooting',
-      'Meta',
-      'Even Realities',
-      'Eardopes',
-      'Mous',
-      'MovaTech',
-      'Garmin',
-      'SteamOne'
+      'Amazon', 'Apple', 'MemoryPC', 'PlayStation',
+      'Back Market', 'JoyBuy', 'Asus', 'Lenovo',
+      'Logitech', 'Dyson', 'JBL', 'Bose', 'Kef',
+      'Bowers & Wilkins', 'Canon', 'Ring', 'Eufy',
+      'Arlo', 'Epson', 'KitchenAid', 'Moulinex',
+      'Ninja Kitchen', 'Shark Ninja', 'Tineco',
+      'Bissell', 'Bambu Lab', 'Oral-B', 'Oura Ring',
+      'Wooting', 'Meta', 'Even Realities', 'Eardopes',
+      'Mous', 'MovaTech', 'Garmin', 'SteamOne'
     ]
   },
 
   {
     title: '💎 Luxe',
     shops: [
-      'Tiffany & Co.',
-      'Prada',
-      'Coach',
-      'Balenciaga',
-      'Moncler',
-      'Fendi',
-      'Givenchy',
-      'Dolce & Gabbana',
-      'Bottega Veneta',
-      'Celine',
-      'Christian Louboutin',
-      'Alexander McQueen',
-      'Maison Margiela',
-      'Jacquemus',
-      'Golden Goose',
-      'Jimmy Choo',
-      'Lanvin',
-      'Casablanca',
-      'MCM',
-      'Rimowa',
-      'Messika',
-      'Selfridges',
-      'Four Seasons Shop',
-      'LeMaire',
-      'Canada Goose',
+      'Tiffany & Co.', 'Prada', 'Coach', 'Balenciaga',
+      'Moncler', 'Fendi', 'Givenchy', 'Dolce & Gabbana',
+      'Bottega Veneta', 'Celine', 'Christian Louboutin',
+      'Alexander McQueen', 'Maison Margiela', 'Jacquemus',
+      'Golden Goose', 'Jimmy Choo', 'Lanvin', 'Casablanca',
+      'MCM', 'Rimowa', 'Messika', 'Selfridges',
+      'Four Seasons Shop', 'LeMaire', 'Canada Goose',
       'Net-a-Porter'
     ]
   },
@@ -579,51 +473,23 @@ const CATALOG = [
   {
     title: '💄 Beauté & Bien-être',
     shops: [
-      'Sephora',
-      'Nocibé',
-      "Victoria's Secret",
-      'Lounge',
-      'Rituals',
-      'Lancôme',
-      'Aesop',
-      'Kylie Cosmetics',
-      'Creed',
-      'Parfums de Marly',
-      'Kilian Paris',
-      'Jo Malone',
-      'Chogan',
-      'Fragrance',
-      'Manscaped',
-      'Flaconi'
+      'Sephora', 'Nocibé', "Victoria's Secret",
+      'Lounge', 'Rituals', 'Lancôme', 'Aesop',
+      'Kylie Cosmetics', 'Creed', 'Parfums de Marly',
+      'Kilian Paris', 'Jo Malone', 'Chogan',
+      'Fragrance', 'Manscaped', 'Flaconi'
     ]
   },
 
   {
     title: '🏋️ Sport & Musculation',
     shops: [
-      'Lululemon',
-      'Alo Yoga',
-      'On Running',
-      'Teveo',
-      'Gymshark',
-      'NutriMuscle',
-      'Esprit Padel Shop',
-      'Nike',
-      'Adidas',
-      'Puma',
-      'New Balance',
-      'Asics',
-      'JD Sports',
-      'Patagonia',
-      'Venum',
-      'GymBeam',
-      'Dragon Bleu',
-      'NBA Store',
-      'Golf Galaxy',
-      'SnowLeader',
-      'DopeSnow',
-      'Nocta',
-      'Decathlon',
+      'Lululemon', 'Alo Yoga', 'On Running', 'Teveo',
+      'Gymshark', 'NutriMuscle', 'Esprit Padel Shop',
+      'Nike', 'Adidas', 'Puma', 'New Balance', 'Asics',
+      'JD Sports', 'Patagonia', 'Venum', 'GymBeam',
+      'Dragon Bleu', 'NBA Store', 'Golf Galaxy',
+      'SnowLeader', 'DopeSnow', 'Nocta', 'Decathlon',
       'Alpiniste'
     ]
   },
@@ -631,54 +497,29 @@ const CATALOG = [
   {
     title: '💍 Bijoux & Horlogerie',
     shops: [
-      'Tiffany & Co.',
-      '58 Facettes',
-      'Pandora',
-      'Swarovski',
-      'Marc-Orian',
-      'Tissot',
-      'Fossil',
-      'Paul Valentine',
-      'Isabel Bernard',
-      'G-Shock'
+      'Tiffany & Co.', '58 Facettes', 'Pandora',
+      'Swarovski', 'Marc-Orian', 'Tissot', 'Fossil',
+      'Paul Valentine', 'Isabel Bernard', 'G-Shock'
     ]
   },
 
   {
     title: '🏠 Maison & Lifestyle',
     shops: [
-      'Wine in Black',
-      'KitchenAid',
-      'Moulinex',
-      'Boutique Stanley',
-      'Home24',
-      'Arlo',
-      'Eufy',
-      'Ring',
-      'Zooplus',
-      'Maxi Zoo',
-      'Onyx Cookware',
-      'ManoMano',
-      'Nespresso'
+      'Wine in Black', 'KitchenAid', 'Moulinex',
+      'Boutique Stanley', 'Home24', 'Arlo', 'Eufy',
+      'Ring', 'Zooplus', 'Maxi Zoo', 'Onyx Cookware',
+      'ManoMano', 'Nespresso'
     ]
   },
 
   {
     title: '🎁 Divers',
     shops: [
-      'Amazon',
-      'PayPal',
-      'LEGO',
-      'Funko',
-      'Magic Madhouse',
-      'Pokémon Center',
-      'Thomann',
-      'Bax Music',
-      'Ekster',
-      'Aniioki',
-      'Le Petit Vapoteur',
-      'Air Up',
-      'AliExpress'
+      'Amazon', 'PayPal', 'LEGO', 'Funko',
+      'Magic Madhouse', 'Pokémon Center', 'Thomann',
+      'Bax Music', 'Ekster', 'Aniioki',
+      'Le Petit Vapoteur', 'Air Up', 'AliExpress'
     ]
   }
 ];
@@ -916,8 +757,7 @@ function shopLine(name) {
 }
 
 function baseEmbed() {
-  return new EmbedBuilder()
-    .setColor(EMBED_COLOR);
+  return new EmbedBuilder().setColor(EMBED_COLOR);
 }
 
 // ========================================
@@ -954,62 +794,47 @@ function categoryFooter() {
 }
 
 // ========================================
-// EMBEDS DES CATÉGORIES
+// UN SEUL EMBED PAR CATÉGORIE
 // ========================================
 
-// 12 boutiques maximum par embed.
-// Même présentation et même pied de page.
+// Toutes les boutiques d'une catégorie
+// restent ensemble, sans découpage.
 //
-// Les liens restent en gras et cliquables.
-// Une ligne vide sépare chaque boutique.
+// Chaque nom est en gras et cliquable.
+// Une ligne vide sépare les boutiques.
 //
-// Les catégories longues sont réparties
-// automatiquement sur plusieurs embeds.
+// Le message d'information est ajouté
+// à la fin de chaque embed.
+//
+// Résultat : 8 embeds de catégories,
+// plus l'introduction et la conclusion.
 
-function categoryEmbeds(section) {
-  const embeds = [];
+function categoryEmbed(section) {
+  const shopText = section.shops
+    .map(shopLine)
+    .join('\n\n');
 
-  const chunks = [];
+  const description = [
+    '━━━━━━━━━━━━',
+    '',
+    shopText,
+    '',
+    '',
+    categoryFooter()
+  ].join('\n');
 
-  for (
-    let index = 0;
-    index < section.shops.length;
-    index += SHOPS_PER_EMBED
-  ) {
-    chunks.push(
-      section.shops.slice(
-        index,
-        index + SHOPS_PER_EMBED
-      )
+  // Sécurité : ne jamais tronquer les liens.
+  // La description doit rester sous la
+  // limite Discord de 4096 caractères.
+  if (description.length > 4096) {
+    throw new Error(
+      `Catégorie trop longue : ${section.title} (${description.length} caractères)`
     );
   }
 
-  chunks.forEach((shops, index) => {
-    const title = index === 0
-      ? section.title
-      : `${section.title} — Suite`;
-
-    const shopText = shops
-      .map(shopLine)
-      .join('\n\n');
-
-    const description = [
-      '━━━━━━━━━━━━',
-      '',
-      shopText,
-      '',
-      '',
-      categoryFooter()
-    ].join('\n');
-
-    embeds.push(
-      baseEmbed()
-        .setTitle(title)
-        .setDescription(description)
-    );
-  });
-
-  return embeds;
+  return baseEmbed()
+    .setTitle(section.title)
+    .setDescription(description);
 }
 
 // ========================================
@@ -1034,28 +859,27 @@ function catalogOutro() {
 }
 
 // ========================================
-// MESSAGES DU CATALOGUE
+// EXACTEMENT 10 MESSAGES
 // ========================================
 
 function catalogMessages() {
   const messages = [];
 
+  // 1. Introduction
   messages.push({
     embeds: [catalogIntro()],
     allowedMentions: { parse: [] }
   });
 
+  // 2 à 9. Les huit catégories
   for (const section of CATALOG) {
-    const embeds = categoryEmbeds(section);
-
-    for (const embed of embeds) {
-      messages.push({
-        embeds: [embed],
-        allowedMentions: { parse: [] }
-      });
-    }
+    messages.push({
+      embeds: [categoryEmbed(section)],
+      allowedMentions: { parse: [] }
+    });
   }
 
+  // 10. Conclusion
   messages.push({
     embeds: [catalogOutro()],
     allowedMentions: { parse: [] }
@@ -1168,6 +992,10 @@ client.once(Events.ClientReady, async () => {
 
     console.log(
       `📚 Catalogue chargé : ${count} entrées.`
+    );
+
+    console.log(
+      '📨 Catalogue configuré pour 10 messages.'
     );
 
   } catch (error) {
@@ -1350,7 +1178,11 @@ client.on(Events.InteractionCreate, async i => {
             throw new Error('Salon inaccessible');
           }
 
-          for (const payload of catalogMessages()) {
+          // Prépare tous les messages avant
+          // de commencer la publication.
+          const messages = catalogMessages();
+
+          for (const payload of messages) {
             await channel.send(payload);
             count++;
           }
