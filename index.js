@@ -38,7 +38,6 @@ const GUILD_ID =
   process.env.GUILD_ID || '1195047756910309456';
 
 const OWNER_ID = '1195042683064942624';
-
 const TICKET_CHANNEL_ID = '1195054777025958008';
 
 const SESSION_TIMEOUT = 15 * 60 * 1000;
@@ -279,12 +278,10 @@ function buildUE(s, urls) {
     )
   );
 
-  // Espace invisible sous le titre
   c.addTextDisplayComponents(
     new TextDisplayBuilder().setContent('\u200B')
   );
 
-  // Séparation Discord
   c.addSeparatorComponents(
     new SeparatorBuilder()
       .setDivider(true)
@@ -490,7 +487,10 @@ const CATALOG = [
       'GOAT',
       'StockX',
       '4Elementos',
-      'Zadig & Voltaire'
+      'Zadig & Voltaire',
+
+      // NOUVEAU
+      'La Redoute'
     ]
   },
 
@@ -530,7 +530,11 @@ const CATALOG = [
       'Even Realities',
       'Eardopes',
       'Mous',
-      'MovaTech'
+      'MovaTech',
+
+      // NOUVEAUX
+      'Garmin',
+      'SteamOne'
     ]
   },
 
@@ -583,7 +587,10 @@ const CATALOG = [
       'Jo Malone',
       'Chogan',
       'Fragrance',
-      'Manscaped'
+      'Manscaped',
+
+      // NOUVEAU
+      'Flaconi'
     ]
   },
 
@@ -611,7 +618,11 @@ const CATALOG = [
       'Golf Galaxy',
       'SnowLeader',
       'DopeSnow',
-      'Nocta'
+      'Nocta',
+
+      // NOUVEAUX
+      'Decathlon',
+      'Alpiniste'
     ]
   },
 
@@ -643,7 +654,12 @@ const CATALOG = [
       'Eufy',
       'Ring',
       'Zooplus',
-      'Maxi Zoo'
+      'Maxi Zoo',
+
+      // NOUVEAUX
+      'Onyx Cookware',
+      'ManoMano',
+      'Nespresso'
     ]
   },
 
@@ -661,13 +677,16 @@ const CATALOG = [
       'Ekster',
       'Aniioki',
       'Le Petit Vapoteur',
-      'Air Up'
+      'Air Up',
+
+      // NOUVEAU
+      'AliExpress'
     ]
   }
 ];
 
 // ========================================
-// TOUS LES LIENS DES BOUTIQUES
+// LIENS DE TOUTES LES BOUTIQUES
 // ========================================
 
 const SHOP_LINKS = {
@@ -701,15 +720,12 @@ const SHOP_LINKS = {
   'AllSaints': 'https://www.allsaints.com',
   'About You': 'https://www.aboutyou.fr',
   'Jaded London': 'https://jadedldn.com',
-
-  // NOUVEAUX LIENS MODE
   'Four Amsterdam': 'https://www.fouramsterdam.com/',
   'Lounge': 'https://fr.lounge.com/',
   'Mia Burton': 'https://miaburton.com/',
   'Scuffers': 'https://scuffers.com/',
   'Cavallaro Napoli': 'https://www.cavallaronapoli.com/',
   '4Elementos': 'https://4elementos.fr/',
-
   'Arte Antwerp': 'https://arte-antwerp.com',
   'Daily Paper': 'https://dailypaperclothing.com',
   'Axel Arigato': 'https://axelarigato.com',
@@ -736,18 +752,18 @@ const SHOP_LINKS = {
   'StockX': 'https://stockx.com',
   'Zadig & Voltaire': 'https://zadig-et-voltaire.com',
 
+  // NOUVEAU MODE
+  'La Redoute': 'https://www.laredoute.fr/',
+
   // HIGH-TECH
   'Amazon': 'https://www.amazon.fr',
   'Apple': 'https://www.apple.com/fr/',
   'MemoryPC': 'https://www.memorypc.fr',
   'PlayStation': 'https://www.playstation.com/fr-fr/',
   'Back Market': 'https://www.backmarket.fr',
-
-  // NOUVEAUX LIENS HIGH-TECH
   'JoyBuy': 'https://www.joybuy.fr/',
   'Eardopes': 'https://eardopes.fr/',
   'MovaTech': 'https://fr.mova.tech/',
-
   'Asus': 'https://www.asus.com/fr/',
   'Lenovo': 'https://www.lenovo.com/fr/fr/',
   'Logitech': 'https://www.logitech.com/fr-fr',
@@ -774,6 +790,10 @@ const SHOP_LINKS = {
   'Meta': 'https://www.meta.com',
   'Even Realities': 'https://www.evenrealities.com',
   'Mous': 'https://www.mous.co',
+
+  // NOUVEAUX HIGH-TECH
+  'Garmin': 'https://www.garmin.com/fr-FR/',
+  'SteamOne': 'https://steam-one.com/',
 
   // LUXE
   'Tiffany & Co.': 'https://www.tiffany.fr',
@@ -816,9 +836,10 @@ const SHOP_LINKS = {
   'Jo Malone': 'https://www.jomalone.fr',
   'Chogan': 'https://www.chogangroupspa.com',
   'Manscaped': 'https://www.manscaped.com',
-
-  // NOUVEAU LIEN BEAUTÉ
   'Fragrance': 'https://fragrance-and-co.com/',
+
+  // NOUVEAU BEAUTÉ
+  'Flaconi': 'https://www.flaconi.fr/',
 
   // SPORT
   'Lululemon': 'https://www.lululemon.com',
@@ -827,10 +848,7 @@ const SHOP_LINKS = {
   'Teveo': 'https://teveo.com',
   'Gymshark': 'https://fr.gymshark.com',
   'NutriMuscle': 'https://www.nutrimuscle.com',
-
-  // NOUVEAU LIEN SPORT
   'Esprit Padel Shop': 'https://esprit-padel-shop.com/',
-
   'Nike': 'https://www.nike.com/fr',
   'Puma': 'https://eu.puma.com/fr/fr',
   'New Balance': 'https://www.newbalance.fr',
@@ -845,6 +863,10 @@ const SHOP_LINKS = {
   'SnowLeader': 'https://www.snowleader.com',
   'DopeSnow': 'https://www.dopesnow.com',
   'Nocta': 'https://www.nocta.com',
+
+  // NOUVEAUX SPORT
+  'Decathlon': 'https://www.decathlon.fr/',
+  'Alpiniste': 'https://www.alpiniste.fr/',
 
   // BIJOUX
   '58 Facettes': 'https://58facettes.fr',
@@ -864,6 +886,11 @@ const SHOP_LINKS = {
   'Zooplus': 'https://www.zooplus.fr',
   'Maxi Zoo': 'https://www.maxizoo.fr',
 
+  // NOUVEAUX MAISON
+  'Onyx Cookware': 'https://onyxcookware.fr/',
+  'ManoMano': 'https://www.manomano.fr/',
+  'Nespresso': 'https://www.nespresso.com/fr/fr/',
+
   // DIVERS
   'PayPal': 'https://www.paypal.com/fr/home',
   'LEGO': 'https://www.lego.com/fr-fr',
@@ -875,9 +902,10 @@ const SHOP_LINKS = {
   'Ekster': 'https://www.ekster.com',
   'Le Petit Vapoteur': 'https://www.lepetitvapoteur.com',
   'Air Up': 'https://shop.air-up.com/fr/fr',
+  'Aniioki': 'https://aniioki.com/',
 
-  // NOUVEAU LIEN DIVERS
-  'Aniioki': 'https://aniioki.com/'
+  // NOUVEAU DIVERS
+  'AliExpress': 'https://fr.aliexpress.com/'
 };
 
 // ========================================
@@ -1973,7 +2001,7 @@ client.on(Events.MessageCreate, async message => {
 });
 
 // ========================================
-// CONNEXION
+// CONNEXION DISCORD
 // ========================================
 
 client.login(TOKEN);
