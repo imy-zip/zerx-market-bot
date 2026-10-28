@@ -23,7 +23,8 @@ const {
   SeparatorBuilder,
   SeparatorSpacingSize,
   AttachmentBuilder,
-  PermissionFlagsBits
+  PermissionFlagsBits,
+  EmbedBuilder
 } = require('discord.js');
 
 // ========================================
@@ -43,7 +44,8 @@ const CATALOG_CHANNEL_ID = '1195054550588076176';
 
 const SERVER_INVITE = 'https://discord.gg/zYCc9fDZ3C';
 
-const PREMIUM_BLUE = 0x254C91;
+// Bleu foncé discret et professionnel
+const EMBED_COLOR = 0x364B70;
 
 const SESSION_TIMEOUT = 15 * 60 * 1000;
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
@@ -421,7 +423,7 @@ const commands = [
   new SlashCommandBuilder()
     .setName('message')
     .setDescription(
-      'Publier le catalogue Premium Zerx Market'
+      'Publier le catalogue Zerx Market'
     )
 ];
 
@@ -432,7 +434,6 @@ const commands = [
 const CATALOG = [
   {
     title: '👕 Mode',
-    subtitle: 'Prêt-à-porter, sneakers & accessoires',
     shops: [
       'Adidas',
       'COS',
@@ -500,7 +501,6 @@ const CATALOG = [
 
   {
     title: '💻 High-Tech & Gaming',
-    subtitle: 'Technologie, gaming & équipements',
     shops: [
       'Amazon',
       'Apple',
@@ -543,7 +543,6 @@ const CATALOG = [
 
   {
     title: '💎 Luxe',
-    subtitle: 'Maisons de luxe & créateurs',
     shops: [
       'Tiffany & Co.',
       'Prada',
@@ -576,7 +575,6 @@ const CATALOG = [
 
   {
     title: '💄 Beauté & Bien-être',
-    subtitle: 'Parfums, cosmétiques & soins',
     shops: [
       'Sephora',
       'Nocibé',
@@ -599,7 +597,6 @@ const CATALOG = [
 
   {
     title: '🏋️ Sport & Musculation',
-    subtitle: 'Performance, fitness & outdoor',
     shops: [
       'Lululemon',
       'Alo Yoga',
@@ -630,7 +627,6 @@ const CATALOG = [
 
   {
     title: '💍 Bijoux & Horlogerie',
-    subtitle: 'Bijoux, montres & accessoires précieux',
     shops: [
       'Tiffany & Co.',
       '58 Facettes',
@@ -647,7 +643,6 @@ const CATALOG = [
 
   {
     title: '🏠 Maison & Lifestyle',
-    subtitle: 'Maison, décoration & quotidien',
     shops: [
       'Wine in Black',
       'KitchenAid',
@@ -667,7 +662,6 @@ const CATALOG = [
 
   {
     title: '🎁 Divers',
-    subtitle: 'Découvertes, cadeaux & autres boutiques',
     shops: [
       'Amazon',
       'PayPal',
@@ -687,7 +681,7 @@ const CATALOG = [
 ];
 
 // ========================================
-// LIENS DE TOUTES LES BOUTIQUES
+// LIENS DES BOUTIQUES
 // ========================================
 
 const SHOP_LINKS = {
@@ -898,18 +892,11 @@ const SHOP_LINKS = {
 };
 
 // ========================================
-// CATALOGUE PREMIUM - COMPONENTS V2
+// EMBEDS SOBRES ET PROFESSIONNELS
 // ========================================
 
 function ticket() {
   return `<#${TICKET_CHANNEL_ID}>`;
-}
-
-function ticketUrl() {
-  return (
-    `https://discord.com/channels/` +
-    `${GUILD_ID}/${TICKET_CHANNEL_ID}`
-  );
 }
 
 function shopLine(name) {
@@ -920,126 +907,52 @@ function shopLine(name) {
     '\\$1'
   );
 
-  if (link) {
-    return `• [**${label}**](${link})`;
-  }
-
-  return `• **${label}**`;
+  return link
+    ? `[**${label}**](${link})`
+    : `**${label}**`;
 }
 
-function premiumContainer() {
-  return new ContainerBuilder()
-    .setAccentColor(PREMIUM_BLUE);
-}
-
-function addText(container, text) {
-  container.addTextDisplayComponents(
-    new TextDisplayBuilder().setContent(text)
-  );
-
-  return container;
-}
-
-function addSeparator(container) {
-  container.addSeparatorComponents(
-    new SeparatorBuilder()
-      .setDivider(true)
-      .setSpacing(SeparatorSpacingSize.Small)
-  );
-
-  return container;
-}
-
-function ticketButton() {
-  return new ButtonBuilder()
-    .setLabel('Ouvrir un ticket')
-    .setEmoji('🎫')
-    .setStyle(ButtonStyle.Link)
-    .setURL(ticketUrl());
-}
-
-function catalogButton() {
-  return new ButtonBuilder()
-    .setLabel('Voir le catalogue')
-    .setEmoji('📚')
-    .setStyle(ButtonStyle.Link)
-    .setURL(
-      `https://discord.com/channels/` +
-      `${GUILD_ID}/${CATALOG_CHANNEL_ID}`
-    );
-}
-
-function serverButton() {
-  return new ButtonBuilder()
-    .setLabel('Partager le serveur')
-    .setEmoji('💙')
-    .setStyle(ButtonStyle.Link)
-    .setURL(SERVER_INVITE);
+function baseEmbed() {
+  return new EmbedBuilder()
+    .setColor(EMBED_COLOR);
 }
 
 // ========================================
-// INTRODUCTION PREMIUM
+// INTRODUCTION
 // ========================================
 
-function premiumIntro() {
-  const c = premiumContainer();
-
-  addText(
-    c,
-    [
-      '## 💎 ZERX MARKET',
-      '### CATALOGUE OFFICIEL',
+function catalogIntro() {
+  return baseEmbed()
+    .setDescription([
+      '## 📚 Catalogue des boutiques,',
       '',
-      '*Votre sélection de boutiques, réunie au même endroit.*'
-    ].join('\n')
-  );
-
-  addSeparator(c);
-
-  addText(
-    c,
-    [
-      'Bienvenue dans le catalogue **Zerx Market**.',
+      '━━━━━━━━━━━━',
       '',
-      'Découvrez les boutiques disponibles à travers nos **8 catégories**.',
-      '',
-      '✦ **199 entrées** dans le catalogue',
-      '✦ **8 univers** à découvrir',
-      '✦ **Liens directs** vers les boutiques'
-    ].join('\n')
-  );
-
-  addSeparator(c);
-
-  addText(
-    c,
-    [
-      '### ✧ Avant de commander',
+      'Retrouvez toutes les boutiques actuellement disponibles.',
       '',
       '⏳ Les délais et les montants maximums varient selon la boutique.',
       '',
-      `🎫 Pour obtenir les informations, rendez-vous dans ${ticket()}.`
-    ].join('\n')
-  );
-
-  c.addActionRowComponents(
-    new ActionRowBuilder().addComponents(
-      ticketButton()
-    )
-  );
-
-  return c;
+      `📩 Ouvrez un ${ticket()} avant toute commande pour obtenir toutes les informations.`
+    ].join('\n'));
 }
 
 // ========================================
-// CATÉGORIES PREMIUM
+// EMBEDS DES CATÉGORIES
 // ========================================
 
-// MODIFICATION : une ligne vide entre
-// chaque boutique.
+// Discord limite une description d'embed
+// à 4096 caractères.
+//
+// On répartit automatiquement les longues
+// catégories sur plusieurs embeds.
+//
+// Chaque boutique reste en gras, cliquable,
+// avec une ligne vide entre les noms.
 
-function splitShops(section) {
+function categoryEmbeds(section) {
+  const embeds = [];
   const chunks = [];
+
   let current = '';
 
   for (const name of section.shops) {
@@ -1049,7 +962,7 @@ function splitShops(section) {
       ? `${current}\n\n${line}`
       : line;
 
-    if (candidate.length > 2500 && current) {
+    if (candidate.length > 3500 && current) {
       chunks.push(current);
       current = line;
     } else {
@@ -1061,66 +974,30 @@ function splitShops(section) {
     chunks.push(current);
   }
 
-  return chunks;
-}
+  chunks.forEach((chunk, index) => {
+    const title = index === 0
+      ? section.title
+      : `${section.title} — Suite`;
 
-// MODIFICATION : aucun nombre de boutiques
-// affiché en bas des catégories.
-
-function premiumCategory(section, index) {
-  const c = premiumContainer();
-
-  const number = String(index + 1).padStart(2, '0');
-
-  addText(
-    c,
-    [
-      `### ${number}  |  ${section.title}`,
-      `*${section.subtitle}*`
-    ].join('\n')
-  );
-
-  addSeparator(c);
-
-  const chunks = splitShops(section);
-
-  chunks.forEach((chunk, chunkIndex) => {
-    if (chunkIndex > 0) {
-      addSeparator(c);
-    }
-
-    addText(c, chunk);
+    embeds.push(
+      baseEmbed()
+        .setTitle(title)
+        .setDescription(
+          `━━━━━━━━━━━━\n\n${chunk}`
+        )
+    );
   });
 
-  addSeparator(c);
-
-  addText(
-    c,
-    [
-      '💬 *Une question ou une boutique introuvable ?*',
-      `Consultez ${ticket()} pour les délais, limites et disponibilités.`
-    ].join('\n')
-  );
-
-  c.addActionRowComponents(
-    new ActionRowBuilder().addComponents(
-      ticketButton()
-    )
-  );
-
-  return c;
+  return embeds;
 }
 
 // ========================================
-// DERNIER MESSAGE - TEXTE DEMANDÉ
+// CONCLUSION
 // ========================================
 
-function premiumOutro() {
-  const c = premiumContainer();
-
-  addText(
-    c,
-    [
+function catalogOutro() {
+  return baseEmbed()
+    .setDescription([
       '⬆️ **Pensez à remonter vers le haut du salon** afin de voir l’ensemble du catalogue disponible.',
       '',
       '━━━━━━━━━━━━',
@@ -1132,10 +1009,7 @@ function premiumOutro() {
       'ℹ️ **À noter :** Cette liste n’inclut pas toutes les boutiques qu’il est possible de RF. Si vous avez une boutique en tête, envoyez-nous le site via un ticket et notre équipe vérifiera si celle-ci est réalisable ou non.',
       '',
       '❤️ **Merci pour votre confiance !**'
-    ].join('\n')
-  );
-
-  return c;
+    ].join('\n'));
 }
 
 // ========================================
@@ -1146,24 +1020,23 @@ function catalogMessages() {
   const messages = [];
 
   messages.push({
-    flags: MessageFlags.IsComponentsV2,
-    components: [premiumIntro()],
+    embeds: [catalogIntro()],
     allowedMentions: { parse: [] }
   });
 
-  CATALOG.forEach((section, index) => {
-    messages.push({
-      flags: MessageFlags.IsComponentsV2,
-      components: [
-        premiumCategory(section, index)
-      ],
-      allowedMentions: { parse: [] }
-    });
-  });
+  for (const section of CATALOG) {
+    const embeds = categoryEmbeds(section);
+
+    for (const embed of embeds) {
+      messages.push({
+        embeds: [embed],
+        allowedMentions: { parse: [] }
+      });
+    }
+  }
 
   messages.push({
-    flags: MessageFlags.IsComponentsV2,
-    components: [premiumOutro()],
+    embeds: [catalogOutro()],
     allowedMentions: { parse: [] }
   });
 
@@ -1195,7 +1068,7 @@ function catalogControls(channelId = null) {
     buttons(
       [
         'zm:catalog:send',
-        'Publier le catalogue Premium',
+        'Publier le catalogue',
         ButtonStyle.Success
       ],
       [
@@ -1273,7 +1146,7 @@ client.once(Events.ClientReady, async () => {
     );
 
     console.log(
-      `💎 Catalogue Premium chargé : ${count} entrées.`
+      `📚 Catalogue chargé : ${count} entrées.`
     );
 
   } catch (error) {
@@ -1333,18 +1206,9 @@ client.on(Events.InteractionCreate, async i => {
         sending: false
       });
 
-      const total = CATALOG.reduce(
-        (count, section) =>
-          count + section.shops.length,
-        0
-      );
-
       return i.reply({
         content:
-          '💎 **ZERX MARKET — CATALOGUE PREMIUM**\n\n' +
-          `📚 ${CATALOG.length} catégories\n` +
-          `🛍️ ${total} boutiques\n` +
-          '🎨 Design bleu nuit Premium\n\n' +
+          '📚 **ZERX MARKET — CATALOGUE**\n\n' +
           'Choisis le salon dans lequel publier le catalogue.',
 
         components: catalogControls(),
@@ -1402,9 +1266,9 @@ client.on(Events.InteractionCreate, async i => {
 
         return i.update({
           content:
-            '💎 **Catalogue Premium prêt !**\n\n' +
+            '📚 **Catalogue prêt !**\n\n' +
             `📢 Salon : <#${channel.id}>\n\n` +
-            'Clique sur **Publier le catalogue Premium** pour confirmer.',
+            'Clique sur **Publier le catalogue** pour confirmer.',
 
           components: catalogControls(channel.id)
         });
@@ -1449,7 +1313,7 @@ client.on(Events.InteractionCreate, async i => {
 
         await i.update({
           content:
-            '⏳ Publication du catalogue Premium en cours…',
+            '⏳ Publication du catalogue en cours…',
           components: []
         });
 
@@ -1474,10 +1338,9 @@ client.on(Events.InteractionCreate, async i => {
 
           return i.editReply({
             content:
-              '💎 **CATALOGUE PREMIUM PUBLIÉ !**\n\n' +
+              '✅ **CATALOGUE PUBLIÉ !**\n\n' +
               `📢 Salon : <#${channel.id}>\n` +
-              `📨 ${count} messages envoyés.\n` +
-              '🎨 Design bleu nuit activé.',
+              `📨 ${count} messages envoyés.`,
 
             components: []
           });
