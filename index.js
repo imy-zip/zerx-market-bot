@@ -227,10 +227,12 @@ function buildRF(s, urls) {
     )
   );
 
+  // ESPACEMENT ENTRE LE TITRE ET LE COMMENTAIRE
+  // Uniquement si un commentaire est présent.
   if (s.comment?.trim()) {
     c.addTextDisplayComponents(
       new TextDisplayBuilder().setContent(
-        `💬 ${safe(s.comment)}`
+        `\u200B\n\n💬 ${safe(s.comment)}`
       )
     );
   }
@@ -797,18 +799,6 @@ function categoryFooter() {
 // UN SEUL EMBED PAR CATÉGORIE
 // ========================================
 
-// Toutes les boutiques d'une catégorie
-// restent ensemble, sans découpage.
-//
-// Chaque nom est en gras et cliquable.
-// Une ligne vide sépare les boutiques.
-//
-// Le message d'information est ajouté
-// à la fin de chaque embed.
-//
-// Résultat : 8 embeds de catégories,
-// plus l'introduction et la conclusion.
-
 function categoryEmbed(section) {
   const shopText = section.shops
     .map(shopLine)
@@ -823,9 +813,6 @@ function categoryEmbed(section) {
     categoryFooter()
   ].join('\n');
 
-  // Sécurité : ne jamais tronquer les liens.
-  // La description doit rester sous la
-  // limite Discord de 4096 caractères.
   if (description.length > 4096) {
     throw new Error(
       `Catégorie trop longue : ${section.title} (${description.length} caractères)`
@@ -865,13 +852,11 @@ function catalogOutro() {
 function catalogMessages() {
   const messages = [];
 
-  // 1. Introduction
   messages.push({
     embeds: [catalogIntro()],
     allowedMentions: { parse: [] }
   });
 
-  // 2 à 9. Les huit catégories
   for (const section of CATALOG) {
     messages.push({
       embeds: [categoryEmbed(section)],
@@ -879,7 +864,6 @@ function catalogMessages() {
     });
   }
 
-  // 10. Conclusion
   messages.push({
     embeds: [catalogOutro()],
     allowedMentions: { parse: [] }
@@ -1021,7 +1005,6 @@ client.on(Events.InteractionCreate, async i => {
   }
 
   try {
-    // PROPRIÉTAIRE UNIQUEMENT
     if (i.user.id !== OWNER_ID) {
       return i.reply({
         content: '⛔ Tu ne peux pas utiliser ce bot.',
@@ -1088,7 +1071,6 @@ client.on(Events.InteractionCreate, async i => {
         });
       }
 
-      // CHOIX DU SALON
       if (i.customId === 'zm:catalog:channel') {
         if (s.step !== 'choose') {
           return i.reply({
@@ -1123,7 +1105,6 @@ client.on(Events.InteractionCreate, async i => {
         });
       }
 
-      // ANNULER
       if (i.customId === 'zm:catalog:cancel') {
         if (s.sending) {
           return i.reply({
@@ -1140,7 +1121,6 @@ client.on(Events.InteractionCreate, async i => {
         });
       }
 
-      // PUBLIER
       if (i.customId === 'zm:catalog:send') {
         if (s.sending || s.step !== 'choose') {
           return i.reply({
@@ -1178,8 +1158,6 @@ client.on(Events.InteractionCreate, async i => {
             throw new Error('Salon inaccessible');
           }
 
-          // Prépare tous les messages avant
-          // de commencer la publication.
           const messages = catalogMessages();
 
           for (const payload of messages) {
@@ -1251,7 +1229,6 @@ client.on(Events.InteractionCreate, async i => {
       });
     }
 
-    // VOUCH DÉJÀ PUBLIÉ
     if (
       i.isButton() &&
       i.customId === 'zm:confirm' &&
