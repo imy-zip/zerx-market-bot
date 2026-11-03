@@ -227,12 +227,12 @@ function buildRF(s, urls) {
     )
   );
 
-  // ESPACEMENT ENTRE LE TITRE ET LE COMMENTAIRE
-  // Uniquement si un commentaire est présent.
+  // ESPACEMENT SUPPLÉMENTAIRE UNIQUEMENT
+  // LORSQU'UN COMMENTAIRE EST RENSEIGNÉ.
   if (s.comment?.trim()) {
     c.addTextDisplayComponents(
       new TextDisplayBuilder().setContent(
-        `\u200B\n\n💬 ${safe(s.comment)}`
+        `\u200B\n\n\u200B\n\n💬 ${safe(s.comment)}`
       )
     );
   }
