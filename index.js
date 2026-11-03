@@ -227,12 +227,18 @@ function buildRF(s, urls) {
     )
   );
 
-  // ESPACEMENT SUPPLÉMENTAIRE UNIQUEMENT
-  // LORSQU'UN COMMENTAIRE EST RENSEIGNÉ.
+  // LIGNE HORIZONTALE UNIQUEMENT
+  // LORSQU'UN COMMENTAIRE EST PRÉSENT.
   if (s.comment?.trim()) {
+    c.addSeparatorComponents(
+      new SeparatorBuilder()
+        .setDivider(true)
+        .setSpacing(SeparatorSpacingSize.Small)
+    );
+
     c.addTextDisplayComponents(
       new TextDisplayBuilder().setContent(
-        `\u200B\n\n\u200B\n\n💬 ${safe(s.comment)}`
+        `💬 ${safe(s.comment)}`
       )
     );
   }
@@ -241,6 +247,7 @@ function buildRF(s, urls) {
     new TextDisplayBuilder().setContent('\u200B')
   );
 
+  // LIGNE HABITUELLE AVANT "LIENS UTILES"
   c.addSeparatorComponents(
     new SeparatorBuilder()
       .setDivider(true)
