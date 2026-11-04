@@ -1,4 +1,3 @@
-
 'use strict';
 
 const {
@@ -227,8 +226,7 @@ function buildRF(s, urls) {
     )
   );
 
-  // LIGNE HORIZONTALE UNIQUEMENT
-  // LORSQU'UN COMMENTAIRE EST PRÉSENT.
+  // Ligne horizontale uniquement si commentaire.
   if (s.comment?.trim()) {
     c.addSeparatorComponents(
       new SeparatorBuilder()
@@ -247,7 +245,7 @@ function buildRF(s, urls) {
     new TextDisplayBuilder().setContent('\u200B')
   );
 
-  // LIGNE HABITUELLE AVANT "LIENS UTILES"
+  // Ligne habituelle avant les liens utiles.
   c.addSeparatorComponents(
     new SeparatorBuilder()
       .setDivider(true)
@@ -495,11 +493,11 @@ const CATALOG = [
     shops: [
       'Lululemon', 'Alo Yoga', 'On Running', 'Teveo',
       'Gymshark', 'NutriMuscle', 'Esprit Padel Shop',
-      'Nike', 'Adidas', 'Puma', 'New Balance', 'Asics',
-      'JD Sports', 'Patagonia', 'Venum', 'GymBeam',
-      'Dragon Bleu', 'NBA Store', 'Golf Galaxy',
-      'SnowLeader', 'DopeSnow', 'Nocta', 'Decathlon',
-      'Alpiniste'
+      'Nike', 'Adidas', 'Under Armour', 'Puma',
+      'New Balance', 'Asics', 'JD Sports', 'Patagonia',
+      'Venum', 'GymBeam', 'Dragon Bleu', 'NBA Store',
+      'Golf Galaxy', 'SnowLeader', 'DopeSnow', 'Nocta',
+      'Decathlon', 'Alpiniste'
     ]
   },
 
@@ -692,6 +690,7 @@ const SHOP_LINKS = {
   'NutriMuscle': 'https://www.nutrimuscle.com',
   'Esprit Padel Shop': 'https://esprit-padel-shop.com/',
   'Nike': 'https://www.nike.com/fr',
+  'Under Armour': 'https://www.underarmour.fr/',
   'Puma': 'https://eu.puma.com/fr/fr',
   'New Balance': 'https://www.newbalance.fr',
   'Asics': 'https://www.asics.com/fr/fr-fr/',
@@ -745,7 +744,7 @@ const SHOP_LINKS = {
 };
 
 // ========================================
-// EMBEDS SOBRES ET PROFESSIONNELS
+// EMBEDS DU CATALOGUE
 // ========================================
 
 function ticket() {
