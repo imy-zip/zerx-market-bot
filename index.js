@@ -1,3 +1,4 @@
+
 'use strict';
 
 const {
@@ -36,7 +37,9 @@ const GUILD_ID = process.env.GUILD_ID || '1195047756910309456';
 
 const OWNER_ID = '1195042683064942624';
 const TICKET_CHANNEL_ID = '1195054777025958008';
-const CATALOG_CHANNEL_ID = '1195054550588076176';
+
+// NOUVEAU SALON DE LA LISTE COMPLÈTE
+const CATALOG_CHANNEL_ID = '1561028864539492412';
 
 const SERVER_INVITE = 'https://discord.gg/zYCc9fDZ3C';
 
@@ -535,6 +538,7 @@ const CATALOG = [
 // ========================================
 
 const SHOP_LINKS = {
+  // MODE
   'Adidas': 'https://www.adidas.fr',
   'COS': 'https://www.cos.com',
   'Mango': 'https://shop.mango.com',
@@ -598,6 +602,7 @@ const SHOP_LINKS = {
   'La Redoute': 'https://www.laredoute.fr/',
   'SKIMS': 'https://skims.com/',
 
+  // HIGH-TECH
   'Amazon': 'https://www.amazon.fr',
   'Apple': 'https://www.apple.com/fr/',
   'MemoryPC': 'https://www.memorypc.fr',
@@ -635,6 +640,7 @@ const SHOP_LINKS = {
   'Garmin': 'https://www.garmin.com/fr-FR/',
   'SteamOne': 'https://steam-one.com/',
 
+  // LUXE
   'Tiffany & Co.': 'https://www.tiffany.fr',
   'Prada': 'https://www.prada.com',
   'Coach': 'https://fr.coach.com',
@@ -662,6 +668,7 @@ const SHOP_LINKS = {
   'Canada Goose': 'https://www.canadagoose.com',
   'Net-a-Porter': 'https://www.net-a-porter.com',
 
+  // BEAUTÉ
   'Sephora': 'https://www.sephora.fr',
   'Nocibé': 'https://www.nocibe.fr',
   'Rituals': 'https://www.rituals.com',
@@ -677,6 +684,7 @@ const SHOP_LINKS = {
   'Manscaped': 'https://www.manscaped.com',
   'Flaconi': 'https://www.flaconi.fr/',
 
+  // SPORT
   'Lululemon': 'https://www.lululemon.com',
   'Alo Yoga': 'https://www.aloyoga.com',
   'On Running': 'https://www.on.com',
@@ -702,6 +710,7 @@ const SHOP_LINKS = {
   'Decathlon': 'https://www.decathlon.fr/',
   'Alpiniste': 'https://www.alpiniste.fr/',
 
+  // BIJOUX
   '58 Facettes': 'https://58facettes.fr',
   'Pandora': 'https://fr.pandora.net',
   'Swarovski': 'https://www.swarovski.com',
@@ -712,6 +721,7 @@ const SHOP_LINKS = {
   'Isabel Bernard': 'https://www.isabelbernard.com',
   'G-Shock': 'https://gshock.casio.com',
 
+  // MAISON
   'Wine in Black': 'https://www.wine-in-black.fr',
   'Boutique Stanley': 'https://eu.stanley1913.com',
   'Home24': 'https://www.home24.fr',
@@ -721,6 +731,7 @@ const SHOP_LINKS = {
   'ManoMano': 'https://www.manomano.fr/',
   'Nespresso': 'https://www.nespresso.com/fr/fr/',
 
+  // DIVERS
   'PayPal': 'https://www.paypal.com/fr/home',
   'LEGO': 'https://www.lego.com/fr-fr',
   'Funko': 'https://funko.com',
@@ -736,7 +747,7 @@ const SHOP_LINKS = {
 };
 
 // ========================================
-// CATALOGUE COMPLET
+// EMBEDS DU CATALOGUE COMPLET
 // ========================================
 
 function ticket() {
@@ -919,7 +930,7 @@ function mainShopsEmbed() {
     ''
   ];
 
-  // Espacement entre les boutiques et leurs délais.
+  // Espacement entre les boutiques et les délais
   for (const shop of MAIN_SHOPS) {
     lines.push(
       `• ${shop.emoji} [**${shop.name}**](${shop.url})${shop.extra ? ` ${shop.extra}` : ''}`,
@@ -930,7 +941,7 @@ function mainShopsEmbed() {
     );
   }
 
-  // Catalogue complet et tickets, sans emoji devant les salons.
+  // Lien vers le nouveau salon, avec une ligne d'espace
   lines.push(
     '━━━━━━━━━━━━',
     '',
@@ -939,6 +950,7 @@ function mainShopsEmbed() {
     '**Toutes les boutiques disponibles sont répertoriées dans notre catalogue complet.**',
     '',
     '👇 **CLIQUEZ JUSTE ICI POUR VOIR TOUTES LES BOUTIQUES :**',
+    '',
     ticketCatalog(),
     '',
     '━━━━━━━━━━━━',
@@ -962,7 +974,7 @@ function mainShopsMessages() {
 }
 
 // ========================================
-// CONTRÔLES /MESSAGE
+// CHOIX DU TYPE DE /MESSAGE
 // ========================================
 
 function messageTypeControls() {
@@ -1004,10 +1016,23 @@ function catalogControls(channelId = null) {
 
   return [
     new ActionRowBuilder().addComponents(menu),
+
     buttons(
-      ['zm:catalog:send', 'Publier', ButtonStyle.Success],
-      ['zm:catalog:back', 'Retour', ButtonStyle.Secondary],
-      ['zm:catalog:cancel', 'Annuler', ButtonStyle.Danger]
+      [
+        'zm:catalog:send',
+        'Publier',
+        ButtonStyle.Success
+      ],
+      [
+        'zm:catalog:back',
+        'Retour',
+        ButtonStyle.Secondary
+      ],
+      [
+        'zm:catalog:cancel',
+        'Annuler',
+        ButtonStyle.Danger
+      ]
     )
   ];
 }
@@ -1030,6 +1055,7 @@ async function allowedChannel(interaction, channelId) {
   if (!channel?.send) return null;
 
   const member = await interaction.guild.members.fetchMe();
+
   const permissions = channel.permissionsFor(member);
 
   const required = [
@@ -1107,7 +1133,7 @@ client.on(Events.InteractionCreate, async i => {
     }
 
     // ====================================
-    // /MESSAGE
+    // /MESSAGE : CHOIX
     // ====================================
 
     if (
@@ -1137,13 +1163,14 @@ client.on(Events.InteractionCreate, async i => {
           '',
           'Choisis une option ci-dessous.'
         ].join('\n'),
+
         components: messageTypeControls(),
         flags: MessageFlags.Ephemeral
       });
     }
 
     // ====================================
-    // GESTION /MESSAGE
+    // /MESSAGE : INTERACTIONS
     // ====================================
 
     if (
@@ -1163,7 +1190,10 @@ client.on(Events.InteractionCreate, async i => {
         });
       }
 
-      if (i.customId === 'zm:catalog:type:main') {
+      if (
+        i.customId === 'zm:catalog:type:main' ||
+        i.customId === 'zm:catalog:type:full'
+      ) {
         if (s.step !== 'type') {
           return i.reply({
             content: '⏳ Cette étape est déjà terminée.',
@@ -1171,48 +1201,23 @@ client.on(Events.InteractionCreate, async i => {
           });
         }
 
-        s.type = 'main';
+        s.type = i.customId.endsWith('main')
+          ? 'main'
+          : 'full';
+
         s.step = 'choose';
         s.targetChannelId = null;
         s.updated = Date.now();
 
         return i.update({
           content: [
-            '## ⭐ Boutiques principales',
+            `## ${messageTypeName(s.type)}`,
             '',
-            'Tu as choisi les **7 boutiques principales**.',
-            '',
-            '📢 **Dans quel salon veux-tu publier ce message ?**',
+            `📢 **Dans quel salon veux-tu publier ${s.type === 'main' ? 'ce message' : 'les 10 messages'} ?**`,
             '',
             'Sélectionne un salon ci-dessous.'
           ].join('\n'),
-          components: catalogControls()
-        });
-      }
 
-      if (i.customId === 'zm:catalog:type:full') {
-        if (s.step !== 'type') {
-          return i.reply({
-            content: '⏳ Cette étape est déjà terminée.',
-            flags: MessageFlags.Ephemeral
-          });
-        }
-
-        s.type = 'full';
-        s.step = 'choose';
-        s.targetChannelId = null;
-        s.updated = Date.now();
-
-        return i.update({
-          content: [
-            '## 📚 Catalogue complet',
-            '',
-            'Tu as choisi le **catalogue complet**.',
-            '',
-            '📢 **Dans quel salon veux-tu publier les 10 messages ?**',
-            '',
-            'Sélectionne un salon ci-dessous.'
-          ].join('\n'),
           components: catalogControls()
         });
       }
@@ -1241,6 +1246,7 @@ client.on(Events.InteractionCreate, async i => {
             '',
             'Choisis une option ci-dessous.'
           ].join('\n'),
+
           components: messageTypeControls()
         });
       }
@@ -1275,6 +1281,7 @@ client.on(Events.InteractionCreate, async i => {
             '',
             'Clique sur **Publier** pour confirmer.'
           ].join('\n'),
+
           components: catalogControls(channel.id)
         });
       }
@@ -1355,6 +1362,7 @@ client.on(Events.InteractionCreate, async i => {
               `📢 **Salon :** <#${channel.id}>`,
               `📨 **Messages envoyés :** ${count}`
             ].join('\n'),
+
             components: []
           });
 
@@ -1371,6 +1379,7 @@ client.on(Events.InteractionCreate, async i => {
               '',
               'Vérifie le salon avant de relancer `/message` pour éviter les doublons.'
             ].join('\n'),
+
             components: []
           });
         }
@@ -1399,12 +1408,14 @@ client.on(Events.InteractionCreate, async i => {
 
       return i.reply({
         content: '📋 **De quel type est ce vouch ?**',
+
         components: [
           buttons(
             ['zm:rf', 'RF', ButtonStyle.Primary],
             ['zm:ue', 'UE', ButtonStyle.Success]
           )
         ],
+
         flags: MessageFlags.Ephemeral
       });
     }
@@ -1428,6 +1439,10 @@ client.on(Events.InteractionCreate, async i => {
         flags: MessageFlags.Ephemeral
       });
     }
+
+    // ====================================
+    // BOUTON RF
+    // ====================================
 
     if (i.isButton() && i.customId === 'zm:rf') {
       if (s.step !== 'type') {
@@ -1467,6 +1482,10 @@ client.on(Events.InteractionCreate, async i => {
 
       return i.showModal(modal);
     }
+
+    // ====================================
+    // BOUTON UE
+    // ====================================
 
     if (i.isButton() && i.customId === 'zm:ue') {
       if (s.step !== 'type') {
@@ -1510,6 +1529,10 @@ client.on(Events.InteractionCreate, async i => {
       return i.showModal(modal);
     }
 
+    // ====================================
+    // FORMULAIRE RF
+    // ====================================
+
     if (
       i.isModalSubmit() &&
       i.customId === 'zm:form:rf'
@@ -1550,6 +1573,10 @@ client.on(Events.InteractionCreate, async i => {
       });
     }
 
+    // ====================================
+    // FORMULAIRE UE
+    // ====================================
+
     if (
       i.isModalSubmit() &&
       i.customId === 'zm:form:ue'
@@ -1578,7 +1605,14 @@ client.on(Events.InteractionCreate, async i => {
       });
     }
 
-    if (i.isButton() && i.customId === 'zm:photo2yes') {
+    // ====================================
+    // DEUXIÈME PHOTO : OUI
+    // ====================================
+
+    if (
+      i.isButton() &&
+      i.customId === 'zm:photo2yes'
+    ) {
       if (s.type !== 'RF' || s.step !== 'ask2') {
         return i.reply({
           content: 'Étape terminée.',
@@ -1595,7 +1629,14 @@ client.on(Events.InteractionCreate, async i => {
       });
     }
 
-    if (i.isButton() && i.customId === 'zm:photo2no') {
+    // ====================================
+    // DEUXIÈME PHOTO : NON
+    // ====================================
+
+    if (
+      i.isButton() &&
+      i.customId === 'zm:photo2no'
+    ) {
       if (s.type !== 'RF' || s.step !== 'ask2') {
         return i.reply({
           content: 'Étape terminée.',
@@ -1612,6 +1653,10 @@ client.on(Events.InteractionCreate, async i => {
 
       return showPreview(i.channel, s);
     }
+
+    // ====================================
+    // CHOIX DU SALON VOUCH
+    // ====================================
 
     if (
       i.isChannelSelectMenu() &&
@@ -1657,7 +1702,14 @@ client.on(Events.InteractionCreate, async i => {
       });
     }
 
-    if (i.isButton() && i.customId === 'zm:cancel') {
+    // ====================================
+    // ANNULER LE VOUCH
+    // ====================================
+
+    if (
+      i.isButton() &&
+      i.customId === 'zm:cancel'
+    ) {
       if (
         s.step !== 'preview' ||
         s.previewMessageId !== i.message.id
@@ -1679,7 +1731,14 @@ client.on(Events.InteractionCreate, async i => {
       });
     }
 
-    if (i.isButton() && i.customId === 'zm:confirm') {
+    // ====================================
+    // CONFIRMER LE VOUCH
+    // ====================================
+
+    if (
+      i.isButton() &&
+      i.customId === 'zm:confirm'
+    ) {
       if (s.previewMessageId !== i.message.id) {
         return i.reply({
           content: 'Prévisualisation inactive.',
@@ -1717,7 +1776,10 @@ client.on(Events.InteractionCreate, async i => {
       let published = null;
 
       try {
-        const channel = await allowedChannel(i, s.targetChannelId);
+        const channel = await allowedChannel(
+          i,
+          s.targetChannelId
+        );
 
         if (!channel) {
           throw new Error('Salon inaccessible');
@@ -1837,7 +1899,10 @@ client.on(Events.MessageCreate, async message => {
     s.photos.push(photo);
     added = true;
 
-    if (s.type === 'RF' && previousStep === 'photo1') {
+    if (
+      s.type === 'RF' &&
+      previousStep === 'photo1'
+    ) {
       s.step = 'ask2';
       touch(s);
 
