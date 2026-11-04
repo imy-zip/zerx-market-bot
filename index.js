@@ -28,7 +28,7 @@ const {
 } = require('discord.js');
 
 // ========================================
-// CONFIGURATION
+// CONFIGURATION ZERX MARKET
 // ========================================
 
 const TOKEN = process.env.DISCORD_TOKEN;
@@ -40,6 +40,7 @@ const TICKET_CHANNEL_ID = '1195054777025958008';
 const CATALOG_CHANNEL_ID = '1195054550588076176';
 
 const SERVER_INVITE = 'https://discord.gg/zYCc9fDZ3C';
+
 const EMBED_COLOR = 0x364B70;
 const SESSION_TIMEOUT = 15 * 60 * 1000;
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
@@ -107,7 +108,10 @@ function esc(value) {
 }
 
 function money(value) {
-  const amount = esc(value).replace(/\n/g, ' ').trim();
+  const amount = esc(value)
+    .replace(/\n/g, ' ')
+    .trim();
+
   return amount.includes('€') ? amount : amount + '€';
 }
 
@@ -118,6 +122,7 @@ function normalizeUrl(value) {
 
   try {
     const parsed = new URL(raw);
+
     return ['http:', 'https:'].includes(parsed.protocol)
       ? parsed.href
       : null;
@@ -127,7 +132,10 @@ function normalizeUrl(value) {
 }
 
 function rfTitle(s) {
-  const site = esc(s.site).toUpperCase().replace(/\n/g, ' ');
+  const site = esc(s.site)
+    .toUpperCase()
+    .replace(/\n/g, ' ');
+
   const title = s.siteUrl
     ? `[${site}](${s.siteUrl})`
     : site;
@@ -148,6 +156,10 @@ function extOf(attachment) {
     .exec(attachment.name || '')?.[1]
     ?.toLowerCase() || 'png';
 }
+
+// ========================================
+// PHOTOS
+// ========================================
 
 async function prepPhoto(attachment) {
   if (attachment.size > MAX_IMAGE_BYTES) {
@@ -201,7 +213,7 @@ function gallery(urls) {
 }
 
 // ========================================
-// VOUCH RF
+// DESIGN VOUCH RF
 // ========================================
 
 function buildRF(s, urls) {
@@ -215,6 +227,7 @@ function buildRF(s, urls) {
     )
   );
 
+  // Ligne horizontale uniquement si commentaire.
   if (s.comment?.trim()) {
     c.addSeparatorComponents(
       new SeparatorBuilder()
@@ -233,6 +246,7 @@ function buildRF(s, urls) {
     new TextDisplayBuilder().setContent('\u200B')
   );
 
+  // Ligne habituelle avant les liens utiles.
   c.addSeparatorComponents(
     new SeparatorBuilder()
       .setDivider(true)
@@ -253,7 +267,7 @@ function buildRF(s, urls) {
 }
 
 // ========================================
-// VOUCH UE
+// DESIGN VOUCH UE
 // ========================================
 
 function buildUE(s, urls) {
@@ -300,6 +314,10 @@ function buildVouch(s, urls) {
     : buildRF(s, urls);
 }
 
+// ========================================
+// CONTRÔLES VOUCH
+// ========================================
+
 function vouchControls(s) {
   const menu = new ChannelSelectMenuBuilder()
     .setCustomId('zm:channel')
@@ -317,6 +335,7 @@ function vouchControls(s) {
 
   return [
     new ActionRowBuilder().addComponents(menu),
+
     buttons(
       ['zm:confirm', 'Confirmer', ButtonStyle.Success],
       ['zm:cancel', 'Annuler', ButtonStyle.Danger]
@@ -330,24 +349,30 @@ async function showPreview(channel, s) {
 
   const message = await channel.send({
     flags: MessageFlags.IsComponentsV2,
+
     components: [
       new TextDisplayBuilder().setContent(
         `### 👀 Prévisualisation du vouch ${s.type}`
       ),
+
       ...buildVouch(
         s,
         s.photos.map(photo => photo.url)
       ),
+
       new TextDisplayBuilder().setContent(
         '📢 **Choisis le salon de publication, puis confirme.**'
       ),
+
       ...vouchControls(s)
     ],
+
     allowedMentions: { parse: [] }
   });
 
   s.previewMessageId = message.id;
   s.step = 'preview';
+
   touch(s);
 }
 
@@ -371,8 +396,13 @@ function field(
     .setMaxLength(max)
     .setRequired(required);
 
-  if (placeholder) input.setPlaceholder(placeholder);
-  if (initial) input.setValue(initial);
+  if (placeholder) {
+    input.setPlaceholder(placeholder);
+  }
+
+  if (initial) {
+    input.setValue(initial);
+  }
 
   return new ActionRowBuilder().addComponents(input);
 }
@@ -392,7 +422,7 @@ const commands = [
 ];
 
 // ========================================
-// CATALOGUE COMPLET
+// CATALOGUE COMPLET : 8 CATÉGORIES
 // ========================================
 
 const CATALOG = [
@@ -419,6 +449,7 @@ const CATALOG = [
       'SKIMS'
     ]
   },
+
   {
     title: '💻 High-Tech & Gaming',
     shops: [
@@ -433,6 +464,7 @@ const CATALOG = [
       'Mous', 'MovaTech', 'Garmin', 'SteamOne'
     ]
   },
+
   {
     title: '💎 Luxe',
     shops: [
@@ -446,6 +478,7 @@ const CATALOG = [
       'Net-a-Porter'
     ]
   },
+
   {
     title: '💄 Beauté & Bien-être',
     shops: [
@@ -456,6 +489,7 @@ const CATALOG = [
       'Fragrance', 'Manscaped', 'Flaconi'
     ]
   },
+
   {
     title: '🏋️ Sport & Musculation',
     shops: [
@@ -468,6 +502,7 @@ const CATALOG = [
       'Decathlon', 'Alpiniste'
     ]
   },
+
   {
     title: '💍 Bijoux & Horlogerie',
     shops: [
@@ -476,6 +511,7 @@ const CATALOG = [
       'Paul Valentine', 'Isabel Bernard', 'G-Shock'
     ]
   },
+
   {
     title: '🏠 Maison & Lifestyle',
     shops: [
@@ -485,6 +521,7 @@ const CATALOG = [
       'ManoMano', 'Nespresso'
     ]
   },
+
   {
     title: '🎁 Divers',
     shops: [
@@ -501,6 +538,7 @@ const CATALOG = [
 // ========================================
 
 const SHOP_LINKS = {
+  // MODE
   'Adidas': 'https://www.adidas.fr',
   'COS': 'https://www.cos.com',
   'Mango': 'https://shop.mango.com',
@@ -564,6 +602,7 @@ const SHOP_LINKS = {
   'La Redoute': 'https://www.laredoute.fr/',
   'SKIMS': 'https://skims.com/',
 
+  // HIGH-TECH
   'Amazon': 'https://www.amazon.fr',
   'Apple': 'https://www.apple.com/fr/',
   'MemoryPC': 'https://www.memorypc.fr',
@@ -601,6 +640,7 @@ const SHOP_LINKS = {
   'Garmin': 'https://www.garmin.com/fr-FR/',
   'SteamOne': 'https://steam-one.com/',
 
+  // LUXE
   'Tiffany & Co.': 'https://www.tiffany.fr',
   'Prada': 'https://www.prada.com',
   'Coach': 'https://fr.coach.com',
@@ -628,6 +668,7 @@ const SHOP_LINKS = {
   'Canada Goose': 'https://www.canadagoose.com',
   'Net-a-Porter': 'https://www.net-a-porter.com',
 
+  // BEAUTÉ
   'Sephora': 'https://www.sephora.fr',
   'Nocibé': 'https://www.nocibe.fr',
   'Rituals': 'https://www.rituals.com',
@@ -643,6 +684,7 @@ const SHOP_LINKS = {
   'Manscaped': 'https://www.manscaped.com',
   'Flaconi': 'https://www.flaconi.fr/',
 
+  // SPORT
   'Lululemon': 'https://www.lululemon.com',
   'Alo Yoga': 'https://www.aloyoga.com',
   'On Running': 'https://www.on.com',
@@ -668,6 +710,7 @@ const SHOP_LINKS = {
   'Decathlon': 'https://www.decathlon.fr/',
   'Alpiniste': 'https://www.alpiniste.fr/',
 
+  // BIJOUX
   '58 Facettes': 'https://58facettes.fr',
   'Pandora': 'https://fr.pandora.net',
   'Swarovski': 'https://www.swarovski.com',
@@ -678,6 +721,7 @@ const SHOP_LINKS = {
   'Isabel Bernard': 'https://www.isabelbernard.com',
   'G-Shock': 'https://gshock.casio.com',
 
+  // MAISON
   'Wine in Black': 'https://www.wine-in-black.fr',
   'Boutique Stanley': 'https://eu.stanley1913.com',
   'Home24': 'https://www.home24.fr',
@@ -687,6 +731,7 @@ const SHOP_LINKS = {
   'ManoMano': 'https://www.manomano.fr/',
   'Nespresso': 'https://www.nespresso.com/fr/fr/',
 
+  // DIVERS
   'PayPal': 'https://www.paypal.com/fr/home',
   'LEGO': 'https://www.lego.com/fr-fr',
   'Funko': 'https://funko.com',
@@ -702,7 +747,7 @@ const SHOP_LINKS = {
 };
 
 // ========================================
-// EMBEDS CATALOGUE COMPLET
+// EMBEDS DU CATALOGUE COMPLET
 // ========================================
 
 function ticket() {
@@ -711,7 +756,11 @@ function ticket() {
 
 function shopLine(name) {
   const link = SHOP_LINKS[name];
-  const label = name.replace(/([\\*_[\]`~])/g, '\\$1');
+
+  const label = name.replace(
+    /([\\*_[\]`~])/g,
+    '\\$1'
+  );
 
   return link
     ? `[**${label}**](${link})`
@@ -723,17 +772,18 @@ function baseEmbed() {
 }
 
 function catalogIntro() {
-  return baseEmbed().setDescription([
-    '## 📚 Catalogue des boutiques,',
-    '',
-    '━━━━━━━━━━━━',
-    '',
-    'Retrouvez toutes les boutiques actuellement disponibles.',
-    '',
-    '⏳ Les délais et les montants maximums varient selon la boutique.',
-    '',
-    `📩 Ouvrez un ${ticket()} avant toute commande pour obtenir toutes les informations.`
-  ].join('\n'));
+  return baseEmbed()
+    .setDescription([
+      '## 📚 Catalogue des boutiques,',
+      '',
+      '━━━━━━━━━━━━',
+      '',
+      'Retrouvez toutes les boutiques actuellement disponibles.',
+      '',
+      '⏳ Les délais et les montants maximums varient selon la boutique.',
+      '',
+      `📩 Ouvrez un ${ticket()} avant toute commande pour obtenir toutes les informations.`
+    ].join('\n'));
 }
 
 function categoryFooter() {
@@ -747,7 +797,9 @@ function categoryFooter() {
 }
 
 function categoryEmbed(section) {
-  const shopText = section.shops.map(shopLine).join('\n\n');
+  const shopText = section.shops
+    .map(shopLine)
+    .join('\n\n');
 
   const description = [
     '━━━━━━━━━━━━',
@@ -770,28 +822,29 @@ function categoryEmbed(section) {
 }
 
 function catalogOutro() {
-  return baseEmbed().setDescription([
-    '⬆️ **Pensez à remonter vers le haut du salon** afin de voir l’ensemble du catalogue disponible.',
-    '',
-    '━━━━━━━━━━━━',
-    '',
-    '💬 **Vous ne trouvez pas une boutique ou vous souhaitez obtenir plus d’informations ?**',
-    '',
-    `📩 Ouvrez un ticket juste ici : ${ticket()}`,
-    '',
-    'ℹ️ **À noter :** Cette liste n’inclut pas toutes les boutiques qu’il est possible de RF. Si vous avez une boutique en tête, envoyez-nous le site via un ticket et notre équipe vérifiera si celle-ci est réalisable ou non.',
-    '',
-    '❤️ **Merci pour votre confiance !**'
-  ].join('\n'));
+  return baseEmbed()
+    .setDescription([
+      '⬆️ **Pensez à remonter vers le haut du salon** afin de voir l’ensemble du catalogue disponible.',
+      '',
+      '━━━━━━━━━━━━',
+      '',
+      '💬 **Vous ne trouvez pas une boutique ou vous souhaitez obtenir plus d’informations ?**',
+      '',
+      `📩 Ouvrez un ticket juste ici : ${ticket()}`,
+      '',
+      'ℹ️ **À noter :** Cette liste n’inclut pas toutes les boutiques qu’il est possible de RF. Si vous avez une boutique en tête, envoyez-nous le site via un ticket et notre équipe vérifiera si celle-ci est réalisable ou non.',
+      '',
+      '❤️ **Merci pour votre confiance !**'
+    ].join('\n'));
 }
 
 function catalogMessages() {
-  const messages = [
-    {
-      embeds: [catalogIntro()],
-      allowedMentions: { parse: [] }
-    }
-  ];
+  const messages = [];
+
+  messages.push({
+    embeds: [catalogIntro()],
+    allowedMentions: { parse: [] }
+  });
 
   for (const section of CATALOG) {
     messages.push({
@@ -809,7 +862,7 @@ function catalogMessages() {
 }
 
 // ========================================
-// NOUVEAU : BOUTIQUES PRINCIPALES
+// BOUTIQUES PRINCIPALES
 // ========================================
 
 const MAIN_SHOPS = [
@@ -850,11 +903,11 @@ const MAIN_SHOPS = [
     url: SHOP_LINKS['On Running']
   },
   {
-    name: 'Farfetch',
-    emoji: '🛍️',
-    delay: '~20 jours',
-    maximum: '1 500 €',
-    url: SHOP_LINKS.Farfetch
+    name: 'Alo Yoga',
+    emoji: '🧘',
+    delay: '~1 semaine',
+    maximum: '1 000 €',
+    url: SHOP_LINKS['Alo Yoga']
   },
   {
     name: 'PayPal',
@@ -864,6 +917,10 @@ const MAIN_SHOPS = [
     url: SHOP_LINKS.PayPal
   }
 ];
+
+function ticketCatalog() {
+  return `<#${CATALOG_CHANNEL_ID}>`;
+}
 
 function mainShopsEmbed() {
   const lines = [
@@ -875,10 +932,13 @@ function mainShopsEmbed() {
     ''
   ];
 
+  // Espace supplémentaire entre la boutique et le délai.
   for (const shop of MAIN_SHOPS) {
     lines.push(
       `• ${shop.emoji} [**${shop.name}**](${shop.url})${shop.extra ? ` ${shop.extra}` : ''}`,
+      '',
       `⏳ Délai : **${shop.delay}** | 💰 Maximum : **${shop.maximum}**`,
+      '',
       ''
     );
   }
@@ -898,10 +958,6 @@ function mainShopsEmbed() {
   return baseEmbed().setDescription(lines.join('\n'));
 }
 
-function ticketCatalog() {
-  return `<#${CATALOG_CHANNEL_ID}>`;
-}
-
 function mainShopsMessages() {
   return [
     {
@@ -912,7 +968,7 @@ function mainShopsMessages() {
 }
 
 // ========================================
-// NOUVEAU : CHOIX DU TYPE DE /MESSAGE
+// CHOIX DU TYPE DE /MESSAGE
 // ========================================
 
 function messageTypeControls() {
@@ -954,6 +1010,7 @@ function catalogControls(channelId = null) {
 
   return [
     new ActionRowBuilder().addComponents(menu),
+
     buttons(
       [
         'zm:catalog:send',
@@ -989,9 +1046,12 @@ async function allowedChannel(interaction, channelId) {
     .fetch(channelId)
     .catch(() => null);
 
-  if (!channel?.send) return null;
+  if (!channel?.send) {
+    return null;
+  }
 
   const member = await interaction.guild.members.fetchMe();
+
   const permissions = channel.permissionsFor(member);
 
   const required = [
@@ -1001,7 +1061,9 @@ async function allowedChannel(interaction, channelId) {
     PermissionFlagsBits.AttachFiles
   ];
 
-  if (!permissions?.has(required)) return null;
+  if (!permissions?.has(required)) {
+    return null;
+  }
 
   return channel;
 }
@@ -1011,30 +1073,52 @@ async function allowedChannel(interaction, channelId) {
 // ========================================
 
 client.once(Events.ClientReady, async () => {
-  console.log(`✅ Zerx Market connecté : ${client.user.tag}`);
+  console.log(
+    `✅ Zerx Market connecté : ${client.user.tag}`
+  );
 
   try {
-    const rest = new REST({ version: '10' }).setToken(TOKEN);
+    const rest = new REST({
+      version: '10'
+    }).setToken(TOKEN);
 
     await rest.put(
-      Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID),
+      Routes.applicationGuildCommands(
+        CLIENT_ID,
+        GUILD_ID
+      ),
       {
         body: commands.map(command => command.toJSON())
       }
     );
 
-    console.log('✅ Commandes /vouch et /message enregistrées.');
+    console.log(
+      '✅ Commandes /vouch et /message enregistrées.'
+    );
 
     const count = CATALOG.reduce(
-      (total, section) => total + section.shops.length,
+      (total, section) =>
+        total + section.shops.length,
       0
     );
 
-    console.log(`📚 Catalogue chargé : ${count} entrées.`);
-    console.log('⭐ Boutiques principales : 1 message.');
-    console.log('📨 Catalogue complet : 10 messages.');
+    console.log(
+      `📚 Catalogue chargé : ${count} entrées.`
+    );
+
+    console.log(
+      '⭐ Boutiques principales : 1 message.'
+    );
+
+    console.log(
+      '📨 Catalogue complet : 10 messages.'
+    );
+
   } catch (error) {
-    console.error('❌ Erreur enregistrement commandes :', error);
+    console.error(
+      '❌ Erreur enregistrement commandes :',
+      error
+    );
   }
 });
 
@@ -1060,7 +1144,10 @@ client.on(Events.InteractionCreate, async i => {
       });
     }
 
-    if (!i.inGuild() || i.guildId !== GUILD_ID) {
+    if (
+      !i.inGuild() ||
+      i.guildId !== GUILD_ID
+    ) {
       return i.reply({
         content: '⛔ Serveur non autorisé.',
         flags: MessageFlags.Ephemeral
@@ -1098,7 +1185,9 @@ client.on(Events.InteractionCreate, async i => {
           '',
           'Choisis une option ci-dessous.'
         ].join('\n'),
+
         components: messageTypeControls(),
+
         flags: MessageFlags.Ephemeral
       });
     }
@@ -1119,12 +1208,13 @@ client.on(Events.InteractionCreate, async i => {
         Date.now() - s.updated > SESSION_TIMEOUT
       ) {
         return i.reply({
-          content: '⌛ Session expirée. Relance `/message`.',
+          content:
+            '⌛ Session expirée. Relance `/message`.',
           flags: MessageFlags.Ephemeral
         });
       }
 
-      // Choix boutiques principales
+      // Boutiques principales
       if (i.customId === 'zm:catalog:type:main') {
         if (s.step !== 'type') {
           return i.reply({
@@ -1148,11 +1238,12 @@ client.on(Events.InteractionCreate, async i => {
             '',
             'Sélectionne un salon ci-dessous.'
           ].join('\n'),
+
           components: catalogControls()
         });
       }
 
-      // Choix catalogue complet
+      // Catalogue complet
       if (i.customId === 'zm:catalog:type:full') {
         if (s.step !== 'type') {
           return i.reply({
@@ -1176,11 +1267,12 @@ client.on(Events.InteractionCreate, async i => {
             '',
             'Sélectionne un salon ci-dessous.'
           ].join('\n'),
+
           components: catalogControls()
         });
       }
 
-      // Retour au choix du type
+      // Retour
       if (i.customId === 'zm:catalog:back') {
         if (s.sending) {
           return i.reply({
@@ -1205,6 +1297,7 @@ client.on(Events.InteractionCreate, async i => {
             '',
             'Choisis une option ci-dessous.'
           ].join('\n'),
+
           components: messageTypeControls()
         });
       }
@@ -1225,7 +1318,8 @@ client.on(Events.InteractionCreate, async i => {
 
         if (!channel) {
           return i.reply({
-            content: '❌ Salon inaccessible ou permissions insuffisantes.',
+            content:
+              '❌ Salon inaccessible ou permissions insuffisantes.',
             flags: MessageFlags.Ephemeral
           });
         }
@@ -1243,6 +1337,7 @@ client.on(Events.InteractionCreate, async i => {
             '',
             'Clique sur **Publier** pour confirmer.'
           ].join('\n'),
+
           components: catalogControls(channel.id)
         });
       }
@@ -1275,14 +1370,16 @@ client.on(Events.InteractionCreate, async i => {
 
         if (!s.targetChannelId) {
           return i.reply({
-            content: '📢 Choisis un salon avant de publier.',
+            content:
+              '📢 Choisis un salon avant de publier.',
             flags: MessageFlags.Ephemeral
           });
         }
 
         if (!['main', 'full'].includes(s.type)) {
           return i.reply({
-            content: '❌ Choisis d’abord le type de publication.',
+            content:
+              '❌ Choisis d’abord le type de publication.',
             flags: MessageFlags.Ephemeral
           });
         }
@@ -1291,7 +1388,8 @@ client.on(Events.InteractionCreate, async i => {
         s.step = 'sending';
 
         await i.update({
-          content: '⏳ Publication en cours…',
+          content:
+            '⏳ Publication en cours…',
           components: []
         });
 
@@ -1328,11 +1426,15 @@ client.on(Events.InteractionCreate, async i => {
               `📢 **Salon :** <#${channel.id}>`,
               `📨 **Messages envoyés :** ${count}`
             ].join('\n'),
+
             components: []
           });
 
         } catch (error) {
-          console.error('Erreur publication :', error);
+          console.error(
+            'Erreur publication :',
+            error
+          );
 
           catalogSessions.delete(OWNER_ID);
 
@@ -1344,6 +1446,7 @@ client.on(Events.InteractionCreate, async i => {
               '',
               'Vérifie le salon avant de relancer `/message` pour éviter les doublons.'
             ].join('\n'),
+
             components: []
           });
         }
@@ -1371,13 +1474,16 @@ client.on(Events.InteractionCreate, async i => {
       });
 
       return i.reply({
-        content: '📋 **De quel type est ce vouch ?**',
+        content:
+          '📋 **De quel type est ce vouch ?**',
+
         components: [
           buttons(
             ['zm:rf', 'RF', ButtonStyle.Primary],
             ['zm:ue', 'UE', ButtonStyle.Success]
           )
         ],
+
         flags: MessageFlags.Ephemeral
       });
     }
@@ -1388,22 +1494,33 @@ client.on(Events.InteractionCreate, async i => {
       completedPreviews.has(i.message.id)
     ) {
       return i.reply({
-        content: '✅ Ce vouch a déjà été publié.',
+        content:
+          '✅ Ce vouch a déjà été publié.',
         flags: MessageFlags.Ephemeral
       });
     }
 
     const s = getSession();
 
-    if (!s || s.channelId !== i.channelId) {
+    if (
+      !s ||
+      s.channelId !== i.channelId
+    ) {
       return i.reply({
-        content: '⌛ Session expirée. Recommence avec `/vouch`.',
+        content:
+          '⌛ Session expirée. Recommence avec `/vouch`.',
         flags: MessageFlags.Ephemeral
       });
     }
 
-    // Vouch RF
-    if (i.isButton() && i.customId === 'zm:rf') {
+    // ====================================
+    // BOUTON RF
+    // ====================================
+
+    if (
+      i.isButton() &&
+      i.customId === 'zm:rf'
+    ) {
       if (s.step !== 'type') {
         return i.reply({
           content: 'Formulaire déjà ouvert.',
@@ -1420,8 +1537,19 @@ client.on(Events.InteractionCreate, async i => {
         .setTitle('Vouch Zerx Market');
 
       modal.addComponents(
-        field('site', 'Nom du Site', 'Ex : Amazon.fr'),
-        field('amount', 'Montant', 'Ex : 250', 40),
+        field(
+          'site',
+          'Nom du Site',
+          'Ex : Amazon.fr'
+        ),
+
+        field(
+          'amount',
+          'Montant',
+          'Ex : 250',
+          40
+        ),
+
         field(
           'siteUrl',
           'Lien du site (facultatif)',
@@ -1429,6 +1557,7 @@ client.on(Events.InteractionCreate, async i => {
           500,
           false
         ),
+
         field(
           'comment',
           'Commentaire (optionnel)',
@@ -1442,8 +1571,14 @@ client.on(Events.InteractionCreate, async i => {
       return i.showModal(modal);
     }
 
-    // Vouch UE
-    if (i.isButton() && i.customId === 'zm:ue') {
+    // ====================================
+    // BOUTON UE
+    // ====================================
+
+    if (
+      i.isButton() &&
+      i.customId === 'zm:ue'
+    ) {
       if (s.step !== 'type') {
         return i.reply({
           content: 'Formulaire déjà ouvert.',
@@ -1460,8 +1595,18 @@ client.on(Events.InteractionCreate, async i => {
         .setTitle('Vouch UE Zerx Market');
 
       modal.addComponents(
-        field('clientName', 'Nom du Client', 'Ex : Paul'),
-        field('cook', 'Cuisto', 'Ex : GordonEx'),
+        field(
+          'clientName',
+          'Nom du Client',
+          'Ex : Paul'
+        ),
+
+        field(
+          'cook',
+          'Cuisto',
+          'Ex : GordonEx'
+        ),
+
         field(
           'restaurant',
           'Nom du Restaurant',
@@ -1470,7 +1615,14 @@ client.on(Events.InteractionCreate, async i => {
           true,
           true
         ),
-        field('price', 'Prix commande', 'Ex : 40', 40),
+
+        field(
+          'price',
+          'Prix commande',
+          'Ex : 40',
+          40
+        ),
+
         field(
           'notes',
           'Notes Client',
@@ -1485,12 +1637,18 @@ client.on(Events.InteractionCreate, async i => {
       return i.showModal(modal);
     }
 
-    // Formulaire RF
+    // ====================================
+    // FORMULAIRE RF
+    // ====================================
+
     if (
       i.isModalSubmit() &&
       i.customId === 'zm:form:rf'
     ) {
-      if (s.step !== 'form' || s.type !== 'RF') {
+      if (
+        s.step !== 'form' ||
+        s.type !== 'RF'
+      ) {
         return i.reply({
           content: 'Formulaire déjà traité.',
           flags: MessageFlags.Ephemeral
@@ -1505,7 +1663,8 @@ client.on(Events.InteractionCreate, async i => {
         sessions.delete(OWNER_ID);
 
         return i.reply({
-          content: '❌ URL invalide. Relance `/vouch`.',
+          content:
+            '❌ URL invalide. Relance `/vouch`.',
           flags: MessageFlags.Ephemeral
         });
       }
@@ -1514,24 +1673,32 @@ client.on(Events.InteractionCreate, async i => {
         site: i.fields.getTextInputValue('site'),
         amount: i.fields.getTextInputValue('amount'),
         siteUrl,
-        comment: i.fields.getTextInputValue('comment') || '',
+        comment:
+          i.fields.getTextInputValue('comment') || '',
         step: 'photo1'
       });
 
       touch(s);
 
       return i.reply({
-        content: '📸 **Envoie ta première photo dans ce salon.**',
+        content:
+          '📸 **Envoie ta première photo dans ce salon.**',
         flags: MessageFlags.Ephemeral
       });
     }
 
-    // Formulaire UE
+    // ====================================
+    // FORMULAIRE UE
+    // ====================================
+
     if (
       i.isModalSubmit() &&
       i.customId === 'zm:form:ue'
     ) {
-      if (s.step !== 'form' || s.type !== 'UE') {
+      if (
+        s.step !== 'form' ||
+        s.type !== 'UE'
+      ) {
         return i.reply({
           content: 'Formulaire déjà traité.',
           flags: MessageFlags.Ephemeral
@@ -1539,28 +1706,45 @@ client.on(Events.InteractionCreate, async i => {
       }
 
       Object.assign(s, {
-        clientName: i.fields.getTextInputValue('clientName'),
-        cook: i.fields.getTextInputValue('cook'),
-        restaurant: i.fields.getTextInputValue('restaurant'),
-        price: i.fields.getTextInputValue('price'),
-        notes: i.fields.getTextInputValue('notes'),
+        clientName:
+          i.fields.getTextInputValue('clientName'),
+
+        cook:
+          i.fields.getTextInputValue('cook'),
+
+        restaurant:
+          i.fields.getTextInputValue('restaurant'),
+
+        price:
+          i.fields.getTextInputValue('price'),
+
+        notes:
+          i.fields.getTextInputValue('notes'),
+
         step: 'photo1'
       });
 
       touch(s);
 
       return i.reply({
-        content: '📸 **Envoie ta photo vouch UE dans ce salon.**',
+        content:
+          '📸 **Envoie ta photo vouch UE dans ce salon.**',
         flags: MessageFlags.Ephemeral
       });
     }
 
-    // Deuxième photo : oui
+    // ====================================
+    // RF : DEUXIÈME PHOTO OUI
+    // ====================================
+
     if (
       i.isButton() &&
       i.customId === 'zm:photo2yes'
     ) {
-      if (s.type !== 'RF' || s.step !== 'ask2') {
+      if (
+        s.type !== 'RF' ||
+        s.step !== 'ask2'
+      ) {
         return i.reply({
           content: 'Étape terminée.',
           flags: MessageFlags.Ephemeral
@@ -1571,17 +1755,24 @@ client.on(Events.InteractionCreate, async i => {
       touch(s);
 
       return i.update({
-        content: '📸 **Envoie ta deuxième photo dans ce salon.**',
+        content:
+          '📸 **Envoie ta deuxième photo dans ce salon.**',
         components: []
       });
     }
 
-    // Deuxième photo : non
+    // ====================================
+    // RF : DEUXIÈME PHOTO NON
+    // ====================================
+
     if (
       i.isButton() &&
       i.customId === 'zm:photo2no'
     ) {
-      if (s.type !== 'RF' || s.step !== 'ask2') {
+      if (
+        s.type !== 'RF' ||
+        s.step !== 'ask2'
+      ) {
         return i.reply({
           content: 'Étape terminée.',
           flags: MessageFlags.Ephemeral
@@ -1591,14 +1782,18 @@ client.on(Events.InteractionCreate, async i => {
       s.step = 'processing';
 
       await i.update({
-        content: '✅ Préparation de la prévisualisation...',
+        content:
+          '✅ Préparation de la prévisualisation...',
         components: []
       });
 
       return showPreview(i.channel, s);
     }
 
-    // Choix salon vouch
+    // ====================================
+    // CHOIX DU SALON VOUCH
+    // ====================================
+
     if (
       i.isChannelSelectMenu() &&
       i.customId === 'zm:channel'
@@ -1613,11 +1808,15 @@ client.on(Events.InteractionCreate, async i => {
         });
       }
 
-      const channel = await allowedChannel(i, i.values[0]);
+      const channel = await allowedChannel(
+        i,
+        i.values[0]
+      );
 
       if (!channel) {
         return i.reply({
-          content: '❌ Permissions insuffisantes.',
+          content:
+            '❌ Permissions insuffisantes.',
           flags: MessageFlags.Ephemeral
         });
       }
@@ -1630,20 +1829,27 @@ client.on(Events.InteractionCreate, async i => {
           new TextDisplayBuilder().setContent(
             `### 👀 Prévisualisation du vouch ${s.type}`
           ),
+
           ...buildVouch(
             s,
             s.photos.map(photo => photo.url)
           ),
+
           new TextDisplayBuilder().setContent(
             `📢 **Publication dans :** <#${channel.id}>`
           ),
+
           ...vouchControls(s)
         ],
+
         allowedMentions: { parse: [] }
       });
     }
 
-    // Annuler vouch
+    // ====================================
+    // ANNULER LE VOUCH
+    // ====================================
+
     if (
       i.isButton() &&
       i.customId === 'zm:cancel'
@@ -1669,7 +1875,10 @@ client.on(Events.InteractionCreate, async i => {
       });
     }
 
-    // Confirmer vouch
+    // ====================================
+    // CONFIRMER LE VOUCH
+    // ====================================
+
     if (
       i.isButton() &&
       i.customId === 'zm:confirm'
@@ -1683,7 +1892,8 @@ client.on(Events.InteractionCreate, async i => {
 
       if (s.publishing || s.step === 'publishing') {
         return i.reply({
-          content: '⏳ Publication déjà en cours.',
+          content:
+            '⏳ Publication déjà en cours.',
           flags: MessageFlags.Ephemeral
         });
       }
@@ -1724,8 +1934,11 @@ client.on(Events.InteractionCreate, async i => {
 
         published = await channel.send({
           flags: MessageFlags.IsComponentsV2,
+
           components: buildVouch(s, urls),
+
           files,
+
           allowedMentions: { parse: [] }
         });
 
@@ -1734,17 +1947,22 @@ client.on(Events.InteractionCreate, async i => {
 
         await i.message.edit({
           components: [
-            new TextDisplayBuilder().setContent([
-              `## ✅ Vouch ${s.type} publié !`,
-              '',
-              `📢 Salon : <#${channel.id}>`,
-              `🔗 [Voir le vouch publié](${published.url})`
-            ].join('\n'))
+            new TextDisplayBuilder().setContent(
+              [
+                `## ✅ Vouch ${s.type} publié !`,
+                '',
+                `📢 Salon : <#${channel.id}>`,
+                `🔗 [Voir le vouch publié](${published.url})`
+              ].join('\n')
+            )
           ]
         }).catch(console.error);
 
       } catch (error) {
-        console.error('Erreur publication vouch :', error);
+        console.error(
+          'Erreur publication vouch :',
+          error
+        );
 
         if (published) {
           completedPreviews.add(s.previewMessageId);
@@ -1761,10 +1979,12 @@ client.on(Events.InteractionCreate, async i => {
             new TextDisplayBuilder().setContent(
               '❌ **Publication impossible. Vérifie le salon avant de réessayer.**'
             ),
+
             ...buildVouch(
               s,
               s.photos.map(photo => photo.url)
             ),
+
             ...vouchControls(s)
           ]
         }).catch(() => {});
@@ -1774,7 +1994,10 @@ client.on(Events.InteractionCreate, async i => {
     }
 
   } catch (error) {
-    console.error('Erreur interaction :', error);
+    console.error(
+      'Erreur interaction :',
+      error
+    );
 
     const payload = {
       content: '❌ Une erreur est survenue.',
@@ -1790,7 +2013,7 @@ client.on(Events.InteractionCreate, async i => {
 });
 
 // ========================================
-// RÉCEPTION DES PHOTOS
+// RÉCEPTION DES PHOTOS VOUCH
 // ========================================
 
 client.on(Events.MessageCreate, async message => {
@@ -1814,7 +2037,9 @@ client.on(Events.MessageCreate, async message => {
 
   const attachment = imageOf(message);
 
-  if (!attachment) return;
+  if (!attachment) {
+    return;
+  }
 
   if (attachment.size > MAX_IMAGE_BYTES) {
     return message.reply(
@@ -1823,6 +2048,7 @@ client.on(Events.MessageCreate, async message => {
   }
 
   const previousStep = s.step;
+
   s.step = 'processing';
   touch(s);
 
@@ -1830,6 +2056,7 @@ client.on(Events.MessageCreate, async message => {
 
   try {
     const photo = await prepPhoto(attachment);
+
     s.photos.push(photo);
     added = true;
 
@@ -1841,36 +2068,53 @@ client.on(Events.MessageCreate, async message => {
       touch(s);
 
       await message.reply({
-        content: '📸 **As-tu une 2e photo à ajouter ?**',
+        content:
+          '📸 **As-tu une 2e photo à ajouter ?**',
+
         components: [
           buttons(
-            ['zm:photo2yes', 'Oui', ButtonStyle.Success],
-            ['zm:photo2no', 'Non', ButtonStyle.Danger]
+            [
+              'zm:photo2yes',
+              'Oui',
+              ButtonStyle.Success
+            ],
+            [
+              'zm:photo2no',
+              'Non',
+              ButtonStyle.Danger
+            ]
           )
         ]
       });
+
     } else {
       await showPreview(message.channel, s);
     }
 
   } catch (error) {
-    console.error('Erreur traitement photo :', error);
+    console.error(
+      'Erreur traitement photo :',
+      error
+    );
 
-    if (added) s.photos.pop();
+    if (added) {
+      s.photos.pop();
+    }
 
     s.step = previousStep;
     touch(s);
 
-    const content = error.message === 'IMAGE_TOO_LARGE'
-      ? '❌ Photo trop volumineuse (8 Mo max).'
-      : '❌ Impossible de traiter la photo. Réessaie.';
+    const content =
+      error.message === 'IMAGE_TOO_LARGE'
+        ? '❌ Photo trop volumineuse (8 Mo max).'
+        : '❌ Impossible de traiter la photo. Réessaie.';
 
     await message.reply(content).catch(() => {});
   }
 });
 
 // ========================================
-// CONNEXION
+// CONNEXION DISCORD
 // ========================================
 
 client.login(TOKEN);
