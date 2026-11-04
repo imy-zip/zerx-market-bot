@@ -1,3 +1,4 @@
+
 'use strict';
 
 const {
@@ -444,7 +445,8 @@ const CATALOG = [
       'Samsonite', 'Lipault', 'American Tourister',
       'Eastpak', 'Reima', 'Scuffers', 'Cavallaro Napoli',
       'J Crew', "Arc'Teryx", 'GOAT', 'StockX',
-      '4Elementos', 'Zadig & Voltaire', 'La Redoute'
+      '4Elementos', 'Zadig & Voltaire', 'La Redoute',
+      'SKIMS'
     ]
   },
 
@@ -598,6 +600,7 @@ const SHOP_LINKS = {
   '4Elementos': 'https://4elementos.fr/',
   'Zadig & Voltaire': 'https://zadig-et-voltaire.com',
   'La Redoute': 'https://www.laredoute.fr/',
+  'SKIMS': 'https://skims.com/',
 
   // HIGH-TECH
   'Amazon': 'https://www.amazon.fr',
